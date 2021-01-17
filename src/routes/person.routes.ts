@@ -41,6 +41,12 @@ router.get('/:personId', async (req, res) => {
   try {
     const person = await knex('person').where({ id: +req.params.personId });
 
+    if (!person.length) {
+      res.status(404);
+      res.send({ message: 'Person not found.' });
+      return;
+    }
+
     res.status(200);
     res.send(person);
   } catch (err) {
@@ -86,10 +92,18 @@ router.get('/:personId/pets/:petId', async (req, res) => {
         ownerId: +req.params.personId,
         petId: +req.params.petId,
       })
+      .join('person', { ownerId: 'person.id' })
+      .select('ownerId', 'person.firstName', 'person.lastName')
       .join('pet', { petId: 'pet.id' })
       .select('pet.id', 'pet.name')
       .join('animal', { animalId: 'animal.id' })
       .select('animal.type');
+
+    if (!pet.length) {
+      res.status(404);
+      res.send({ message: 'No pet found for person.' });
+      return;
+    }
 
     res.status(200);
     res.send(pet);
