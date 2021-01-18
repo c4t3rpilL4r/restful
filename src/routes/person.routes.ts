@@ -1,7 +1,7 @@
 import knex from '../db_pg/knex-config';
 import express from 'express';
 import { Person } from '@app/models';
-import { paginationService } from '../core/services/pagination/pagination.service';
+import { paginationService } from '@app/services';
 
 const router = express.Router();
 
@@ -25,11 +25,22 @@ router.post('/', async (req, res) => {
 // all persons
 router.get('/', async (req, res) => {
   try {
-    const persons = await knex('person').select('*');
-    const paginated = paginationService.paginate(req, persons);
+    let persons: any[];
+
+    if (req.query.page && req.query.limit) {
+      const page = +req.query.page;
+      const limit = +req.query.limit;
+
+      persons = await knex('person')
+        .select('*')
+        .offset((page - 1) * limit)
+        .limit(limit);
+    } else {
+      persons = await knex('person').select('*');
+    }
 
     res.status(200);
-    res.send(paginated);
+    res.send(persons);
   } catch (err) {
     res.status(500);
     res.send({ message: 'Error fetching persons data.', error: err });
@@ -68,8 +79,6 @@ router.get('/:personId/pets', async (req, res) => {
 
     const pets = await knex('pet_owner')
       .where({ ownerId: +req.params.personId })
-      .join('person', { ownerId: 'person.id' })
-      .select('ownerId', 'person.firstName', 'person.lastName')
       .join('pet', { petId: 'pet.id' })
       .select('petId', 'pet.name')
       .join('animal', { animalId: 'animal.id' })
@@ -87,6 +96,14 @@ router.get('/:personId/pets', async (req, res) => {
 // fetch a pet from person
 router.get('/:personId/pets/:petId', async (req, res) => {
   try {
+    const person = await knex('person').where({ id: +req.params.personId });
+
+    if (!person.length) {
+      res.status(404);
+      res.send({ message: 'Person not found.' });
+      return;
+    }
+
     const pet = await knex('pet_owner')
       .where({
         ownerId: +req.params.personId,
@@ -149,6 +166,10 @@ router.delete('/:personId', async (req, res) => {
       res.send({ message: 'Person not found.' });
       return;
     }
+
+    await knex('pet_owner')
+      .where({ ownerId: +req.params.personId })
+      .del();
 
     await knex('person')
       .where({ id: +req.params.personId })

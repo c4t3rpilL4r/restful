@@ -1,14 +1,15 @@
 import knex from '../db_pg/knex-config';
 import express from 'express';
 import { Animal, Pet, PetOwner } from '@app/models';
-import { paginationService } from '../core/services/pagination/pagination.service';
 
 const router = express.Router();
 
 // CREATE
 router.post('/', async (req, res) => {
+  const ownerId = +req.body.personId;
+
   try {
-    const person = await knex('person').where({ id: +req.body.ownerId });
+    const person = await knex('person').where({ id: ownerId });
 
     if (!person.length) {
       res.status(404);
@@ -33,12 +34,14 @@ router.post('/', async (req, res) => {
 
     const newPet = await knex('pet').insert(pet).returning('*');
 
-    const petOwner: PetOwner = {
-      ownerId: +req.body.ownerId,
+    const petOwnerDetails: PetOwner = {
+      ownerId,
       petId: +newPet[0].id,
     };
 
-    const newPetOwner = await knex('pet_owner').insert(petOwner).returning('*');
+    const newPetOwner = await knex('pet_owner')
+      .insert(petOwnerDetails)
+      .returning('*');
 
     const newPetOwnerDetails = await knex('pet_owner')
       .where({ ownerId: newPetOwner[0].ownerId, petId: newPetOwner[0].petId })
@@ -68,10 +71,9 @@ router.get('/', async (req, res) => {
       .select('pet.id', 'pet.name')
       .join('animal', { animalId: 'animal.id' })
       .select('animal.type');
-    const paginated = paginationService.paginate(req, pets);
 
     res.status(200);
-    res.send(paginated);
+    res.send(pets);
   } catch (err) {
     res.status(404);
     res.send({ message: 'Error fetching data.', error: err });
@@ -125,6 +127,7 @@ router.get('/:petId/owner', async (req, res) => {
 });
 
 // UPDATE
+// update pet data
 router.put('/:petId', async (req, res) => {
   try {
     const pet = await knex('pet').where({ id: +req.params.petId });
@@ -146,14 +149,17 @@ router.put('/:petId', async (req, res) => {
     res.send(updatedPet);
   } catch (err) {
     res.status(500);
-    res.send({ message: 'Error updating data.', error: err });
+    res.send({ message: 'Error updating pet data.', error: err });
   }
 });
 
-// DELETE
-router.delete('/:petId', async (req, res) => {
+// update pet data for new owner
+router.put('/:petId/persons/:personId', async (req, res) => {
+  const ownerId = +req.params.personId;
+  const petId = +req.params.petId;
+
   try {
-    const pet = await knex('pet').where({ id: +req.params.petId });
+    const pet = await knex('pet').where({ id: petId });
 
     if (!pet.length) {
       res.status(404);
@@ -161,13 +167,77 @@ router.delete('/:petId', async (req, res) => {
       return;
     }
 
-    await knex('pet_owner')
-      .where({ petId: +req.params.petId })
-      .del();
+    const owner = await knex('pet_owner').where({ ownerId, petId });
 
-    await knex('pet')
-      .where({ id: +req.params.petId })
-      .del();
+    if (!owner.length) {
+      res.status(500);
+      res.send({ message: 'Person not owner of pet.' });
+      return;
+    }
+
+    const updatedPetOwnerDetails: PetOwner = { ...req.body };
+
+    const updatedPetOwner = await knex('pet_owner')
+      .where({ ownerId, petId })
+      .update(updatedPetOwnerDetails)
+      .returning('*');
+
+    res.status(200);
+    res.send(updatedPetOwner);
+  } catch (err) {
+    res.status(500);
+    res.send({ message: 'Error updating pet data.', error: err });
+  }
+});
+
+// DELETE
+// delete pet from all owners
+router.delete('/:petId', async (req, res) => {
+  const petId = +req.params.petId;
+
+  try {
+    const pet = await knex('pet').where({ id: petId });
+
+    if (!pet.length) {
+      res.status(404);
+      res.send({ message: 'Pet not found.' });
+      return;
+    }
+
+    await knex('pet_owner').where({ petId }).del();
+    await knex('pet').where({ id: petId }).del();
+
+    res.status(200);
+    res.send({ message: 'Pet data deletion successful.' });
+  } catch (err) {
+    res.status(500);
+    res.send({ message: 'Error deleting pet data.', error: err });
+  }
+});
+
+// delete pet from a specific owner
+router.delete('/:petId/persons/:personId', async (req, res) => {
+  const ownerId = +req.params.personId;
+  const petId = +req.params.petId;
+
+  try {
+    const pet = await knex('pet').where({ id: petId });
+
+    if (!pet.length) {
+      res.status(404);
+      res.send({ message: 'Pet not found.' });
+      return;
+    }
+
+    const owner = await knex('pet_owner').where({ ownerId, petId });
+
+    if (!owner.length) {
+      res.status(500);
+      res.send({ message: 'Person not owner of pet.' });
+      return;
+    }
+
+    await knex('pet_owner').where({ ownerId, petId }).del();
 
     res.status(200);
     res.send({ message: 'Pet data deletion successful.' });
