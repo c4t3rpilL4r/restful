@@ -8,7 +8,9 @@
     "strict": true,
     "baseUrl": "./",
     "paths": {
+      "@app/controllers": ["src/controllers"],
       "@app/models": ["src/core/models"],
+      "@app/repositories": ["src/repositories"],
       "@app/services": ["src/core/services"]
     }
   }

@@ -1,10 +1,6 @@
 import { Express } from 'express';
-import { animalRouter } from './animal.routes';
-import { personRouter } from './person.routes';
-import { petRouter } from './pet.routes';
+import { routes as v1Routes } from './v1/index';
 
 export const initRoutes = (app: Express) => {
-  app.use('/persons', personRouter);
-  app.use('/pets', petRouter);
-  app.use('/animals', animalRouter);
+  app.use('/v1', v1Routes);
 };
