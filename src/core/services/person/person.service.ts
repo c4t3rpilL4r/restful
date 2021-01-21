@@ -18,26 +18,10 @@ const getById = async (personId: number) => {
 };
 
 const update = async (person: Person) => {
-  if (!person.id) {
-    return;
-  }
-
-  const personExists = await personRepository.getById(person.id);
-
-  if (!personExists.length) {
-    return personExists;
-  }
-
   return await personRepository.update(person);
 };
 
 const deleteById = async (personId: number) => {
-  const personExists = await personRepository.getById(personId);
-
-  if (!personExists.length) {
-    return personExists;
-  }
-
   await petOwnerRepository.deleteOwner(personId);
   return await personRepository.deleteById(personId);
 };

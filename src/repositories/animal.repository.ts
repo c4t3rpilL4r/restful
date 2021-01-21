@@ -20,6 +20,10 @@ const getById = async (animalId: number) => {
   return await knex('animal').where({ id: animalId });
 };
 
+const getByType = async (animalType: string) => {
+  return await knex('animal').where({ type: animalType });
+};
+
 const update = async (animal: Animal) => {
   return await knex('animal')
     .where({ id: animal.id })
@@ -36,6 +40,7 @@ export const animalRepository = {
   get,
   getByPage,
   getById,
+  getByType,
   update,
   deleteById,
 };

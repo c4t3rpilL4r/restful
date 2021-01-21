@@ -28,6 +28,10 @@ const deletePet = async (petId: number) => {
   return await knex('pet_owner').where({ petId }).del();
 };
 
+const deleteByOwnerIdAndPetId = async (ownerId: number, petId: number) => {
+  return await knex('pet_owner').where({ ownerId, petId }).del();
+};
+
 export const petOwnerRepository = {
   create,
   getByOwnerId,
@@ -35,4 +39,5 @@ export const petOwnerRepository = {
   updateOwnerId,
   deleteOwner,
   deletePet,
+  deleteByOwnerIdAndPetId,
 };

@@ -10,6 +10,8 @@ router.post('/pets', petController.create);
 
 // READ
 router.get('/pets', petController.get);
+router.get('/pets/:petId', petController.getById);
+
 // router.post('/pets', async (req, res) => {
 //   const ownerId = +req.body.personId;
 

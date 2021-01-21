@@ -1,8 +1,8 @@
 import { Pet, PetOwner } from '@app/models';
 import {
-  petOwnerRepository,
+  animalRepository,
   petRepository,
-  personRepository,
+  petOwnerRepository,
 } from '@app/repositories';
 
 const create = async (personId: number, pet: Pet) => {
@@ -31,40 +31,10 @@ const getById = async (petId: number) => {
 };
 
 const update = async (pet: Pet) => {
-  if (!pet.id) {
-    return;
-  }
-
-  const petExists = await petRepository.getById(pet.id);
-
-  if (!petExists.length) {
-    return petExists;
-  }
-
   return await petRepository.update(pet);
 };
 
-const updateOwner = async (oldOwnerId: number, newPetOwner: PetOwner) => {
-  const oldOwnerExists = await personRepository.getById(oldOwnerId);
-
-  if (!oldOwnerExists.length) {
-    return oldOwnerExists;
-  }
-
-  const newOwnerExists = await personRepository.getById(newPetOwner.ownerId);
-
-  if (!newOwnerExists.length) {
-    return newOwnerExists;
-  }
-};
-
 const deleteById = async (petId: number) => {
-  const petExists = await petRepository.getById(petId);
-
-  if (!petExists.length) {
-    return petExists;
-  }
-
   await petOwnerRepository.deletePet(petId);
   return await petRepository.deleteById(petId);
 };

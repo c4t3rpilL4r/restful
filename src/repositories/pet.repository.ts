@@ -1,8 +1,10 @@
-import { Pet, PetOwner } from '@app/models';
+import { Pet } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (pet: Pet) => {
-  return await knex('pet').insert(pet).returning('*');
+  const newPet = await knex('pet').insert(pet).returning('*');
+
+  return await getById(newPet[0].id);
 };
 
 const get = async () => {
@@ -20,17 +22,24 @@ const getByPage = async (page: number, limit: number) => {
 };
 
 const getById = async (petId: number) => {
-  return await knex('pet')
-    .where({ id: petId })
-    .join('animal', { animalId: 'animal.id' })
-    .select('pet.id', 'pet.name', 'animal.type');
+  return await knex('pet').where({ id: petId });
 };
+
+// const getById = async (petId: number) => {
+//   return await knex('pet')
+//     .where({ id: petId })
+//     .select('pet.id', 'pet.name')
+//     .join('animal', { animalId: 'animal.id' })
+//     .select('animal.type');
+// };
 
 const getByOwner = async (ownerId: number) => {
   const pets = await knex('pet_owner')
     .where({ ownerId })
+    .join('pet', { petId: 'pet.id' })
+    .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
-    .select('pet.id', 'pet.name', 'animal.type');
+    .select('animal.type');
 };
 
 const getByOwnerWithLimit = async (
