@@ -28,7 +28,6 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  await knex('pet_owner').where({ ownerId: personId }).del();
   return await knex('person').where({ id: personId }).del();
 };
 

@@ -1,95 +1,100 @@
 import knex from '../../db_pg/knex-config';
 import express from 'express';
 import { Animal, Pet, PetOwner } from '@app/models';
+import { petController } from '@app/controllers';
 
 const router = express.Router();
 
 // CREATE
-router.post('/pets', async (req, res) => {
-  const ownerId = +req.body.personId;
+router.post('/pets', petController.create);
 
-  try {
-    const person = await knex('person').where({ id: ownerId });
+// READ
+router.get('/pets', petController.get);
+// router.post('/pets', async (req, res) => {
+//   const ownerId = +req.body.personId;
 
-    if (!person.length) {
-      res.status(404).send({ message: 'Person not found.' });
-      return;
-    }
+//   try {
+//     const person = await knex('person').where({ id: ownerId });
 
-    let animal = await knex('animal').where({ type: req.body.animalType });
+//     if (!person.length) {
+//       res.status(404).send({ message: 'Person not found.' });
+//       return;
+//     }
 
-    if (!animal.length) {
-      const newAnimal: Animal = {
-        type: req.body.animalType,
-      };
+//     let animal = await knex('animal').where({ type: req.body.animalType });
 
-      animal = await knex('animal').insert(newAnimal).returning('*');
-    }
+//     if (!animal.length) {
+//       const newAnimal: Animal = {
+//         type: req.body.animalType,
+//       };
 
-    const pet: Pet = {
-      name: req.body.name,
-      animalId: animal[0].id,
-    };
+//       animal = await knex('animal').insert(newAnimal).returning('*');
+//     }
 
-    const newPet = await knex('pet').insert(pet).returning('*');
+//     const pet: Pet = {
+//       name: req.body.name,
+//       animalId: animal[0].id,
+//     };
 
-    const petOwnerDetails: PetOwner = {
-      ownerId,
-      petId: +newPet[0].id,
-    };
+//     const newPet = await knex('pet').insert(pet).returning('*');
 
-    const newPetOwner = await knex('pet_owner')
-      .insert(petOwnerDetails)
-      .returning('*');
+//     const petOwnerDetails: PetOwner = {
+//       ownerId,
+//       petId: +newPet[0].id,
+//     };
 
-    const newPetOwnerDetails = await knex('pet_owner')
-      .where({ ownerId: newPetOwner[0].ownerId, petId: newPetOwner[0].petId })
-      .join('person', { ownerId: 'person.id' })
-      .select('ownerId', 'person.firstName', 'person.lastName')
-      .join('pet', { petId: 'pet.id' })
-      .select('petId', 'pet.name')
-      .join('animal', { animalId: 'animal.id' })
-      .select('animal.type');
+//     const newPetOwner = await knex('pet_owner')
+//       .insert(petOwnerDetails)
+//       .returning('*');
 
-    res.status(200).send(newPetOwnerDetails);
-  } catch (err) {
-    res.status(500).send({ message: 'Error creating pet.', error: err });
-  }
-});
+//     const newPetOwnerDetails = await knex('pet_owner')
+//       .where({ ownerId: newPetOwner[0].ownerId, petId: newPetOwner[0].petId })
+//       .join('person', { ownerId: 'person.id' })
+//       .select('ownerId', 'person.firstName', 'person.lastName')
+//       .join('pet', { petId: 'pet.id' })
+//       .select('petId', 'pet.name')
+//       .join('animal', { animalId: 'animal.id' })
+//       .select('animal.type');
+
+//     res.status(200).send(newPetOwnerDetails);
+//   } catch (err) {
+//     res.status(500).send({ message: 'Error creating pet.', error: err });
+//   }
+// });
 
 // READ
 // all pets
-router.get('/pets', async (req, res) => {
-  try {
-    const pets = await knex('pet_owner')
-      .join('person', { ownerId: 'person.id' })
-      .select('ownerId', 'person.firstName', 'person.lastName')
-      .join('pet', { petId: 'pet.id' })
-      .select('pet.id', 'pet.name')
-      .join('animal', { animalId: 'animal.id' })
-      .select('animal.type');
+// router.get('/pets', async (req, res) => {
+//   try {
+//     const pets = await knex('pet_owner')
+//       .join('person', { ownerId: 'person.id' })
+//       .select('ownerId', 'person.firstName', 'person.lastName')
+//       .join('pet', { petId: 'pet.id' })
+//       .select('pet.id', 'pet.name')
+//       .join('animal', { animalId: 'animal.id' })
+//       .select('animal.type');
 
-    res.status(200).send(pets);
-  } catch (err) {
-    res.status(404).send({ message: 'Error fetching data.', error: err });
-  }
-});
+//     res.status(200).send(pets);
+//   } catch (err) {
+//     res.status(404).send({ message: 'Error fetching data.', error: err });
+//   }
+// });
 
 // individual pet
-router.get('/pets/:petId', async (req, res) => {
-  try {
-    const pet = await knex('pet').where({ id: +req.params.petId });
+// router.get('/pets/:petId', async (req, res) => {
+//   try {
+//     const pet = await knex('pet').where({ id: +req.params.petId });
 
-    if (!pet.length) {
-      res.status(404).send({ message: 'Pet not found.' });
-      return;
-    }
+//     if (!pet.length) {
+//       res.status(404).send({ message: 'Pet not found.' });
+//       return;
+//     }
 
-    res.status(200).send(pet);
-  } catch (err) {
-    res.status(500).send({ message: 'Error fetching pet data.', error: err });
-  }
-});
+//     res.status(200).send(pet);
+//   } catch (err) {
+//     res.status(500).send({ message: 'Error fetching pet data.', error: err });
+//   }
+// });
 
 // fetch owners of pet
 router.get('/pets/:petId/owner', async (req, res) => {

@@ -8,7 +8,7 @@ const create = async (req: Request, res: Response) => {
 
     const newPerson = await personService.create(person);
 
-    res.status(201).send(newPerson);
+    res.status(200).send(newPerson);
   } catch (err) {
     res
       .status(500)
@@ -25,7 +25,9 @@ const get = async (req: Request, res: Response) => {
 
     res.status(200).send(persons);
   } catch (err) {
-    res.status(500).send({ message: 'Error fetching data.', error: err });
+    res
+      .status(500)
+      .send({ message: 'Error fetching person data.', error: err });
   }
 };
 
@@ -43,69 +45,37 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
-// const get = async (personId?: number, page?: number, limit?: number) => {
-//   if (personId) {
-//     return personService.getById(personId);
-//   } else {
-//     if (page && limit) {
-//       return personService.getByPage(page, limit);
-//     } else {
-//       return personService.get();
-//     }
-//   }
-// };
+const update = async (req: Request, res: Response) => {
+  try {
+    const updatedPersonDetails: Person = {
+      id: +req.params.personId,
+      ...req.body,
+    };
 
-const update = async (person: Person) => {
-  return personService.update(person);
+    const updatedPerson = await personService.update(updatedPersonDetails);
+
+    res.status(200).send(updatedPerson);
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: 'Error updating person data.', error: err });
+  }
 };
 
-const deleteById = async (personId: number) => {
-  return personService.deleteById(personId);
+const deleteById = async (req: Request, res: Response) => {
+  try {
+    const personId = +req.params.personId;
+    const data = await personService.deleteById(personId);
 
-  // if (personId && petId) {
-  //   return await knex('pet_owner').where({ ownerId: personId, petId }).del();
-  // } else if (personId) {
-  //   await knex('pet_owner').where({ ownerId: personId }).del();
-  //   return await knex('person').where({ id: personId }).del();
-  // } else if (petId) {
-  //   await knex('pet_owner').where({ ownerId: personId }).del();
-  //   return await knex('pet').where({ id: petId }).del();
-  // }
+    res
+      .status(200)
+      .send(data === 1 ? { message: 'Person deletion successful.' } : data);
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: 'Error deleting person data.', error: err });
+  }
 };
-
-// const getPetsByOwnerId = async (
-//   ownerId: number,
-//   petId?: string,
-//   page?: number,
-//   limit?: number,
-// ) => {
-//   if (petId && +petId > 0) {
-//     return await knex('pet_owner')
-//       .where({ ownerId, petId })
-//       .join('pet', { petId: 'pet.id' })
-//       .select('pet.name')
-//       .join('animal', { animalId: 'animal.id' })
-//       .select('animal.type');
-//   } else {
-//     if (page && limit) {
-//       return await knex('pet_owner')
-//         .where({ ownerId })
-//         .join('pet', { petId: 'pet.id' })
-//         .select('ownerId', 'petId', 'pet.name')
-//         .join('animal', { animalId: 'animal.id' })
-//         .select('animal.type')
-//         .offset((page - 1) * limit)
-//         .limit(limit);
-//     } else {
-//       return await knex('pet_owner')
-//         .where({ ownerId })
-//         .join('pet', { petId: 'pet.id' })
-//         .select('petId', 'pet.name')
-//         .join('animal', { animalId: 'animal.id' })
-//         .select('animal.type');
-//     }
-//   }
-// };
 
 export const personController = {
   create,
