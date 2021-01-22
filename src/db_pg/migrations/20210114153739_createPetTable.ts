@@ -12,7 +12,6 @@ export async function up(knex: Knex): Promise<void> {
         table.string('name').notNullable();
         table.integer('animalId').notNullable();
         table.foreign('animalId').references('animal.id');
-        table.timestamps(false, true);
       })
       .then(() => {
         // tslint:disable-next-line: no-console

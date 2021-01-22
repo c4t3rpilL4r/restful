@@ -1,3 +1,12 @@
 Notes:
 
 1. Check pet.controller.ts update. Logic should be placed in pet.service.ts.
+
+
+
+
+
+
+1. make object for params
+2. read clean code
+3. refactor - rename

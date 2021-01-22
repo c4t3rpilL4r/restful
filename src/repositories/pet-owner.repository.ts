@@ -2,14 +2,34 @@ import { PetOwner } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (petOwner: PetOwner) => {
-  return await knex('pet_owner').insert(petOwner).returning('*');
+  const newPetOwner = await knex('pet_owner').insert(petOwner).returning('*');
+
+  return await knex('pet_owner')
+    .where({
+      ownerId: newPetOwner[0].ownerId,
+      petId: newPetOwner[0].petId,
+    })
+    .select('ownerId')
+    .join('pet', { petId: 'pet.id' })
+    .select('pet.id', 'pet.name')
+    .join('animal', { animalId: 'animal.id' })
+    .select('animal.type');
 };
 
-const get = async () => {
+const getAll = async () => {
   return await knex('pet_owner')
     .select('ownerId')
     .join('pet', { petId: 'pet.id' })
-    .select('petId', 'pet.name')
+    .select('pet.id', 'pet.name')
+    .join('animal', { animalId: 'animal.id' })
+    .select('animal.type');
+};
+
+const getByPage = async (page: number, limit: number) => {
+  return await knex('pet_owner')
+    .select('ownerId')
+    .join('pet', { petId: 'pet.id' })
+    .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
     .select('animal.type');
 };
@@ -41,7 +61,7 @@ const getByPetId = async (petId: number) => {
     .where({ petId })
     .select('ownerId')
     .join('pet', { petId: 'pet.id' })
-    .select('petId', 'pet.name')
+    .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
     .select('animal.type');
 };
@@ -87,7 +107,8 @@ const deleteByOwnerIdAndPetId = async (ownerId: number, petId: number) => {
 
 export const petOwnerRepository = {
   create,
-  get,
+  getAll,
+  getByPage,
   getByOwnerId,
   getByOwnerIdWithLimit,
   getByPetId,

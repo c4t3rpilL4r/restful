@@ -5,8 +5,8 @@ const create = async (petOwner: PetOwner) => {
   return await petOwnerRepository.create(petOwner);
 };
 
-const get = async () => {
-  return await petOwnerRepository.get();
+const getAll = async () => {
+  return await petOwnerRepository.getAll();
 };
 
 const getByOwnerId = async (ownerId: number) => {
@@ -46,7 +46,7 @@ const deleteByOwnerIdAndPetId = async (ownerId: number, petId: number) => {
 
 export const petOwnerService = {
   create,
-  get,
+  getAll,
   getByOwnerId,
   getByOwnerIdWithLimit,
   getByPetId,

@@ -1,19 +1,19 @@
-import { Person } from '@app/models';
+import { Pagination, Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (person: Person) => {
   return await knex('person').insert(person).returning('*');
 };
 
-const get = async () => {
+const getAll = async () => {
   return await knex('person').select();
 };
 
-const getByPage = async (page: number, limit: number) => {
+const getByPage = async (pagination: Pagination) => {
   return await knex('person')
     .select()
-    .offset((page - 1) * limit)
-    .limit(limit);
+    .offset((pagination.page - 1) * pagination.limit)
+    .limit(pagination.limit);
 };
 
 const getById = async (personId: number) => {
@@ -33,7 +33,7 @@ const deleteById = async (personId: number) => {
 
 export const personRepository = {
   create,
-  get,
+  getAll,
   getByPage,
   getById,
   update,

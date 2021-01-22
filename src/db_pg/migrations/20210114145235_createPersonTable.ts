@@ -11,7 +11,6 @@ export async function up(knex: Knex): Promise<void> {
         table.increments('id').primary();
         table.string('firstName').notNullable();
         table.string('lastName').notNullable();
-        table.timestamps(false, true);
       })
       .then(() => {
         // tslint:disable-next-line: no-console

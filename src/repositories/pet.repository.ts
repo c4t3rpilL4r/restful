@@ -35,6 +35,19 @@ const update = async (pet: Pet) => {
   return await knex('pet').where({ id: pet.id }).update(pet).returning('*');
 };
 
+// const update = async (pet: Pet) => {
+//   const updatedPet = await knex('pet')
+//     .where({ id: pet.id })
+//     .update(pet)
+//     .returning('*');
+
+//   return await knex('pet')
+//     .where({ id: updatedPet[0].id })
+//     .select('pet.id', 'pet.name')
+//     .join('animal', { animalId: 'animal.id' })
+//     .select('animal.type');
+// };
+
 const deleteById = async (petId: number) => {
   return await knex('pet').where({ id: petId }).del();
 };

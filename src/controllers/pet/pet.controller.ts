@@ -17,7 +17,7 @@ const create = async (req: Request, res: Response) => {
       return;
     }
 
-    const animalType = req.body.type;
+    const animalType = req.body.animalType;
     let animal = await animalService.getByType(animalType);
 
     if (!animal.length) {
@@ -45,8 +45,9 @@ const get = async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? +req.query.page : 0;
     const limit = req.query.limit ? +req.query.limit : 0;
+    const ownerId = req.query.ownerId ? +req.query.ownerId : 0;
 
-    const pets = await petService.get(page, limit);
+    const pets = await petService.getAll(ownerId, page, limit);
 
     res.status(200).send(pets);
   } catch (err) {
@@ -57,7 +58,6 @@ const get = async (req: Request, res: Response) => {
 const getById = async (req: Request, res: Response) => {
   try {
     const petId = +req.params.petId;
-
     const pet = await petService.getById(petId);
 
     res.status(200).send(pet);
@@ -80,33 +80,47 @@ const update = async (req: Request, res: Response) => {
       return;
     }
 
-    const ownerId = req.query.ownerId;
+    const ownerId = req.body.ownerId;
 
     if (ownerId) {
-      const newPetOwnerDetails: PetOwner = {
-        ...req.body,
-      };
+      const person = await personService.getById(ownerId);
 
-      if (+ownerId > 0) {
-        const oldPetOwnerDetails: PetOwner = {
-          ownerId: +ownerId,
-          petId,
-        };
-
-        await petOwnerService.updateByOwnerId(
-          oldPetOwnerDetails,
-          newPetOwnerDetails,
-        );
-      } else {
-        const petOwnerDetails: PetOwner = {
-          ...req.body,
-        };
-
-        await petOwnerService.update(petOwnerDetails);
+      if (!person.length) {
+        res.status(404).send({ message: 'Person not found.' });
+        return;
       }
     }
 
-    const updatedPetDetails: Pet = { ...req.body };
+    // const ownerId = req.query.ownerId;
+
+    // if (ownerId) {
+    //   const newPetOwnerDetails: PetOwner = {
+    //     ...req.body,
+    //   };
+
+    //   if (+ownerId > 0) {
+    //     const oldPetOwnerDetails: PetOwner = {
+    //       ownerId: +ownerId,
+    //       petId,
+    //     };
+
+    //     await petOwnerService.updateByOwnerId(
+    //       oldPetOwnerDetails,
+    //       newPetOwnerDetails,
+    //     );
+    //   } else {
+    //     const petOwnerDetails: PetOwner = {
+    //       ...req.body,
+    //     };
+
+    //     await petOwnerService.update(petOwnerDetails);
+    //   }
+    // }
+
+    const updatedPetDetails: Pet = {
+      id: petId,
+      ...req.body,
+    };
 
     const updatedPet = await petService.update(updatedPetDetails);
 

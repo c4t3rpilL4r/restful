@@ -10,7 +10,6 @@ export async function up(knex: Knex): Promise<void> {
       .createTable(TABLE_NAME, (table) => {
         table.increments('id').primary();
         table.string('type').unique().notNullable();
-        table.timestamps(false, true);
       })
       .then(() => {
         // tslint:disable-next-line: no-console

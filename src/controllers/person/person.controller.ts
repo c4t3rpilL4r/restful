@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import { Person } from '@app/models';
+import { RequestHandler } from 'express';
+import { Person, Pagination } from '@app/models';
 import { personService } from '@app/services';
 
-const create = async (req: Request, res: Response) => {
+const create: RequestHandler = async (req, res) => {
   try {
     const person: Person = { ...req.body };
     const newPerson = await personService.create(person);
@@ -16,11 +16,20 @@ const create = async (req: Request, res: Response) => {
   }
 };
 
-const get = async (req: Request, res: Response) => {
+const getAll: RequestHandler = async (req, res) => {
   try {
-    const page = req.query.page ? +req.query.page : 0;
-    const limit = req.query.limit ? +req.query.limit : 0;
-    const persons = await personService.get(page, limit);
+    let persons: Person[];
+
+    if (req.query.page && req.query.limit) {
+      const pagination: Pagination = {
+        page: +req.query.page,
+        limit: +req.query.limit,
+      };
+
+      persons = await personService.getByPage(pagination);
+    } else {
+      persons = await personService.getAll();
+    }
 
     res.status(200).send(persons);
   } catch (err) {
@@ -31,7 +40,7 @@ const get = async (req: Request, res: Response) => {
   }
 };
 
-const getById = async (req: Request, res: Response) => {
+const getById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
     const person = await personService.getById(personId);
@@ -50,7 +59,7 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
-const update = async (req: Request, res: Response) => {
+const update: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
     const person = await personService.getById(personId);
@@ -61,6 +70,7 @@ const update = async (req: Request, res: Response) => {
     }
 
     const updatedPersonDetails: Person = {
+      id: person[0].id,
       ...req.body,
     };
 
@@ -75,7 +85,7 @@ const update = async (req: Request, res: Response) => {
   }
 };
 
-const deleteById = async (req: Request, res: Response) => {
+const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
     const person = await personService.getById(personId);
@@ -98,7 +108,7 @@ const deleteById = async (req: Request, res: Response) => {
 
 export const personController = {
   create,
-  get,
+  get: getAll,
   getById,
   update,
   deleteById,

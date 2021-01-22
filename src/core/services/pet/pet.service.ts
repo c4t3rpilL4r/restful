@@ -9,31 +9,43 @@ const create = async (personId: number, pet: Pet) => {
     petId: newPet[0].id,
   };
 
-  await petOwnerRepository.create(petOwner);
-
-  return newPet;
+  return await petOwnerRepository.create(petOwner);
 };
 
-const get = async (page?: number, limit?: number) => {
+const getAll = async (ownerId?: number, page?: number, limit?: number) => {
   if (page && limit) {
-    return await petRepository.getByPage(page, limit);
+    if (ownerId) {
+      return await petOwnerRepository.getByOwnerIdWithLimit(
+        ownerId,
+        page,
+        limit,
+      );
+    } else {
+      return await petOwnerRepository.getByPage(page, limit);
+    }
+  } else if (ownerId) {
+    return await petOwnerRepository.getByOwnerId(ownerId);
   } else {
-    return await petRepository.get();
+    return await petOwnerRepository.getAll();
   }
 };
 
 const getById = async (petId: number) => {
-  return await petRepository.getById(petId);
+  return await petOwnerRepository.getByPetId(petId);
 };
 
 const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
   if (page && limit) {
-    return await 
+    return await petOwnerRepository.getByOwnerIdWithLimit(ownerId, page, limit);
+  } else {
+    return await petOwnerRepository.getByOwnerId(ownerId);
   }
-}
+};
 
 const update = async (pet: Pet) => {
-  return await petRepository.update(pet);
+  const updatedPet = await petRepository.update(pet);
+
+  return await petOwnerRepository.getByPetId(updatedPet[0].id);
 };
 
 const deleteById = async (petId: number) => {
@@ -43,8 +55,9 @@ const deleteById = async (petId: number) => {
 
 export const petService = {
   create,
-  get,
+  getAll,
   getById,
+  getByOwnerId,
   update,
   deleteById,
 };
