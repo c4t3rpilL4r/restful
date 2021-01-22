@@ -58,8 +58,56 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
+const update = async (req: Request, res: Response) => {
+  try {
+    const animalId = +req.params.animalId;
+    const animal = await animalService.getById(animalId);
+
+    if (!animal.length) {
+      res.status(404).send({ message: 'Animal not found.' });
+      return;
+    }
+
+    const updatedAnimalDetails: Animal = {
+      id: animalId,
+      ...req.body,
+    };
+
+    const updatedAnimal = await animalService.update(updatedAnimalDetails);
+
+    res.status(200).send(updatedAnimal);
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error updating animal data.',
+      error: err,
+    });
+  }
+};
+
+const deleteById = async (req: Request, res: Response) => {
+  try {
+    const animalId = +req.params.animalId;
+    const animal = await animalService.getById(animalId);
+
+    if (!animal.length) {
+      res.status(404).send({ message: 'Animal not found.' });
+      return;
+    }
+
+    await animalService.deleteById(animalId);
+
+    res.status(200).send({ message: 'Animal deletion successful.' });
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error deleting animal data.',
+      error: err,
+    });
+  }
+};
+
 export const animalController = {
   create,
   get,
   getById,
+  update,
 };

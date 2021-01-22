@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
-import { Animal, Pet } from '@app/models';
-import { animalService, personService, petService } from '@app/services';
+import { Animal, Pet, PetOwner } from '@app/models';
+import {
+  animalService,
+  personService,
+  petOwnerService,
+  petService,
+} from '@app/services';
 
 const create = async (req: Request, res: Response) => {
   try {
@@ -23,12 +28,12 @@ const create = async (req: Request, res: Response) => {
       animal = await animalService.create(newAnimalDetails);
     }
 
-    const pet: Pet = {
+    const newPetDetails: Pet = {
       name: req.body.name,
       animalId: animal[0].id,
     };
 
-    const newPet = await petService.create(personId, pet);
+    const newPet = await petService.create(personId, newPetDetails);
 
     res.status(200).send(newPet);
   } catch (err) {
@@ -61,6 +66,10 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
+// to update on a specific owner
+// /v1/pets?ownerId=id
+// to update on all owners
+// /v1/pets?ownerId=all
 const update = async (req: Request, res: Response) => {
   try {
     const petId = +req.params.petId;
@@ -69,6 +78,32 @@ const update = async (req: Request, res: Response) => {
     if (!pet.length) {
       res.status(404).send({ message: 'Pet not found.' });
       return;
+    }
+
+    const ownerId = req.query.ownerId;
+
+    if (ownerId) {
+      const newPetOwnerDetails: PetOwner = {
+        ...req.body,
+      };
+
+      if (+ownerId > 0) {
+        const oldPetOwnerDetails: PetOwner = {
+          ownerId: +ownerId,
+          petId,
+        };
+
+        await petOwnerService.updateByOwnerId(
+          oldPetOwnerDetails,
+          newPetOwnerDetails,
+        );
+      } else {
+        const petOwnerDetails: PetOwner = {
+          ...req.body,
+        };
+
+        await petOwnerService.update(petOwnerDetails);
+      }
     }
 
     const updatedPetDetails: Pet = { ...req.body };
@@ -84,9 +119,31 @@ const update = async (req: Request, res: Response) => {
   }
 };
 
+const deleteById = async (req: Request, res: Response) => {
+  try {
+    const petId = +req.params.petId;
+    const pet = await petService.getById(petId);
+
+    if (!pet.length) {
+      res.status(404).send({ message: 'Pet not found.' });
+      return;
+    }
+
+    await petService.deleteById(petId);
+
+    res.status(200).send({ message: 'Pet deletion successful.' });
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error deleting pet data.',
+      error: err,
+    });
+  }
+};
+
 export const petController = {
   create,
   get,
   getById,
   update,
+  deleteById,
 };

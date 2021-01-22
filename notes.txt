@@ -1,0 +1,3 @@
+Notes:
+
+1. Check pet.controller.ts update. Logic should be placed in pet.service.ts.
