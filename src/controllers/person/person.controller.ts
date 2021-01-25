@@ -108,7 +108,7 @@ const deleteById: RequestHandler = async (req, res) => {
 
 export const personController = {
   create,
-  get: getAll,
+  getAll,
   getById,
   update,
   deleteById,
