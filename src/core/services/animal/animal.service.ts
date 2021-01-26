@@ -1,16 +1,16 @@
-import { Animal } from '@app/models';
+import { Animal, Pagination } from '@app/models';
 import { animalRepository } from '@app/repositories';
 
 const create = async (animal: Animal) => {
   return await animalRepository.create(animal);
 };
 
-const get = async (page?: number, limit?: number) => {
-  if (page && limit) {
-    return await animalRepository.getByPage(page, limit);
-  } else {
-    return await animalRepository.get();
-  }
+const getAll = async () => {
+  return await animalRepository.get();
+};
+
+const getByPage = async (pagination: Pagination) => {
+  return await animalRepository.getByPage(pagination);
 };
 
 const getById = async (animalId: number) => {
@@ -31,7 +31,8 @@ const deleteById = async (animalId: number) => {
 
 export const animalService = {
   create,
-  get,
+  getAll,
+  getByPage,
   getById,
   getByType,
   update,

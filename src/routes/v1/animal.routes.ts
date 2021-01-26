@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/animals', animalController.create);
 
 // READ
-router.get('/animals', animalController.get);
+router.get('/animals', animalController.getAll);
 router.get('/animals/:animalId', animalController.getById);
 
 // UPDATE

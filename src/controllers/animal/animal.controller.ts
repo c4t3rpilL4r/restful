@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import { Animal } from '@app/models';
+import { RequestHandler } from 'express';
+import { Animal, Pagination } from '@app/models';
 import { animalService } from '@app/services';
 
-const create = async (req: Request, res: Response) => {
+const create: RequestHandler = async (req, res) => {
   try {
     const animalType = req.body.type;
     const animal = await animalService.getByType(animalType);
@@ -24,11 +24,15 @@ const create = async (req: Request, res: Response) => {
   }
 };
 
-const get = async (req: Request, res: Response) => {
+const getAll: RequestHandler = async (req, res) => {
   try {
-    const page = req.query.page ? +req.query.page : 0;
-    const limit = req.query.limit ? +req.query.limit : 0;
-    const animals = await animalService.get(page, limit);
+    const { page, limit } = req.query;
+    const pagination: Pagination = {
+      page: +page,
+      limit,
+    };
+
+    const animals = await animalService.getByPage(pagination);
 
     res.status(200).send(animals);
   } catch (err) {
@@ -39,7 +43,7 @@ const get = async (req: Request, res: Response) => {
   }
 };
 
-const getById = async (req: Request, res: Response) => {
+const getById: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
     const animal = await animalService.getById(animalId);
@@ -58,7 +62,7 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
-const update = async (req: Request, res: Response) => {
+const update: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
     const animal = await animalService.getById(animalId);
@@ -84,7 +88,7 @@ const update = async (req: Request, res: Response) => {
   }
 };
 
-const deleteById = async (req: Request, res: Response) => {
+const deleteById: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
     const animal = await animalService.getById(animalId);
@@ -107,7 +111,8 @@ const deleteById = async (req: Request, res: Response) => {
 
 export const animalController = {
   create,
-  get,
+  getAll,
   getById,
   update,
+  deleteById,
 };

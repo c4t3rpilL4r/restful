@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Person, Pagination } from '@app/models';
-import { personService } from '@app/services';
+import { personService, petOwnerService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -95,6 +95,7 @@ const deleteById: RequestHandler = async (req, res) => {
       return;
     }
 
+    await petOwnerService.deleteByOwnerId(personId);
     await personService.deleteById(personId);
 
     res.status(200).send({ message: 'Person deletion successful.' });

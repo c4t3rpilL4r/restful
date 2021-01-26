@@ -1,4 +1,4 @@
-import { Animal } from '@app/models';
+import { Animal, Pagination } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (animal: Animal) => {
@@ -9,11 +9,11 @@ const get = async () => {
   return await knex('animal').select();
 };
 
-const getByPage = async (page: number, limit: number) => {
+const getByPage = async (pagination: Pagination) => {
   return await knex('animal')
     .select()
-    .offset((page - 1) * limit)
-    .limit(limit);
+    .offset((pagination.page - 1) * pagination.limit)
+    .limit(pagination.limit);
 };
 
 const getById = async (animalId: number) => {

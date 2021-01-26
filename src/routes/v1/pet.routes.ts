@@ -14,6 +14,7 @@ router.get('/pets/:petId', petController.getById);
 router.put('/pets/:petId', petController.update);
 
 // DELETE
+router.delete('/pets', petController.deleteByOwnerId);
 router.delete('/pets/:petId', petController.deleteById);
 
 export const petRouter = router;

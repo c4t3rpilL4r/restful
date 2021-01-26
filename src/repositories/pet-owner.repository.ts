@@ -67,21 +67,11 @@ const getPetAndOwner = async (petOwner: PetOwner) => {
     .select('animal.type');
 };
 
-const update = async (petOwner: PetOwner) => {
-  return await knex('pet_owner')
-    .where({
-      ownerId: petOwner.ownerId,
-      petId: petOwner.petId,
-    })
-    .update(petOwner)
-    .returning('*');
-};
-
-const deleteOwner = async (ownerId: number) => {
+const deleteByOwnerId = async (ownerId: number) => {
   return await knex('pet_owner').where({ ownerId }).del();
 };
 
-const deletePet = async (petId: number) => {
+const deleteByPetId = async (petId: number) => {
   return await knex('pet_owner').where({ petId }).del();
 };
 
@@ -101,8 +91,7 @@ export const petOwnerRepository = {
   getByOwnerId,
   getByPetId,
   getPetAndOwner,
-  update,
-  deleteOwner,
-  deletePet,
+  deleteByOwnerId,
+  deleteByPetId,
   deletePetAndOwner,
 };

@@ -25,8 +25,12 @@ const getPetAndOwner = async (petOwner: PetOwner) => {
   return await petOwnerRepository.getPetAndOwner(petOwner);
 };
 
-const update = async (petOwner: PetOwner) => {
-  return await petOwnerRepository.update(petOwner);
+const deleteByOwnerId = async (ownerId: number) => {
+  return await petOwnerRepository.deleteByOwnerId(ownerId);
+};
+
+const deleteByPetId = async (petId: number) => {
+  return await petOwnerRepository.deleteByPetId(petId);
 };
 
 const deletePetAndOwner = async (petOwner: PetOwner) => {
@@ -40,6 +44,7 @@ export const petOwnerService = {
   getByOwnerId,
   getByPetId,
   getPetAndOwner,
-  update,
+  deleteByOwnerId,
+  deleteByPetId,
   deletePetAndOwner,
 };

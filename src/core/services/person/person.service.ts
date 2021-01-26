@@ -22,7 +22,6 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  await petOwnerRepository.deleteOwner(personId);
   return await personRepository.deleteById(personId);
 };
 

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { Animal, Pagination, Pet, PetOwner } from '@app/models';
 import {
   animalService,
@@ -7,7 +7,7 @@ import {
   petService,
 } from '@app/services';
 
-const create = async (req: Request, res: Response) => {
+const create: RequestHandler = async (req, res) => {
   try {
     const personId = +req.body.personId;
     const person = await personService.getById(personId);
@@ -41,7 +41,7 @@ const create = async (req: Request, res: Response) => {
   }
 };
 
-const getAll = async (req: Request, res: Response) => {
+const getAll: RequestHandler = async (req, res) => {
   try {
     let pagination: Pagination;
     let pets: any[] = [];
@@ -66,10 +66,11 @@ const getAll = async (req: Request, res: Response) => {
   }
 };
 
-const getById = async (req: Request, res: Response) => {
+const getById: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-    const pet = await petOwnerService.getByPetId(petId);
+    const pet = await petService.getById(petId);
+    // const pet = await petOwnerService.getByPetId(petId);
 
     res.status(200).send(pet);
   } catch (err) {
@@ -77,7 +78,7 @@ const getById = async (req: Request, res: Response) => {
   }
 };
 
-const update = async (req: Request, res: Response) => {
+const update: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
     const pet = await petService.getById(petId);
@@ -121,7 +122,39 @@ const update = async (req: Request, res: Response) => {
   }
 };
 
-const deleteById = async (req: Request, res: Response) => {
+const deleteByOwnerId: RequestHandler = async (req, res) => {
+  try {
+    if (req.query.ownerId) {
+      const ownerId = +req.query.ownerId;
+      const owner = await personService.getById(ownerId);
+
+      if (!owner.length) {
+        res.status(404).send({ message: 'Person not found.' });
+        return;
+      }
+
+      const petOwner = await petOwnerService.getByOwnerId(ownerId);
+
+      if (!petOwner.length) {
+        res.status(404).send({ message: 'Person does not own pet.' });
+        return;
+      }
+
+      await petOwnerService.deleteByOwnerId(ownerId);
+
+      res.status(200).send({ message: 'Pets deletion successful.' });
+    } else {
+      res.status(500).send({ message: 'Owner ID is needed.' });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error deleting pet data.',
+      error: err,
+    });
+  }
+};
+
+const deleteById: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
     const pet = await petService.getById(petId);
@@ -132,9 +165,19 @@ const deleteById = async (req: Request, res: Response) => {
     }
 
     if (req.query.ownerId) {
-    } else {
-      await petService.deleteById(petId);
+      if (+req.query.ownerId > 0) {
+        const petOwner: PetOwner = {
+          ownerId: +req.query.ownerId,
+          petId,
+        };
+
+        await petOwnerService.deletePetAndOwner(petOwner);
+      } else {
+        await petOwnerService.deleteByPetId(petId);
+      }
     }
+
+    await petService.deleteById(petId);
 
     res.status(200).send({ message: 'Pet deletion successful.' });
   } catch (err) {
@@ -150,5 +193,6 @@ export const petController = {
   getAll,
   getById,
   update,
+  deleteByOwnerId,
   deleteById,
 };

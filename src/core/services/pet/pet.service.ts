@@ -21,11 +21,7 @@ const getByPage = async (pagination: Pagination) => {
 };
 
 const getById = async (petId: number) => {
-  return await petOwnerRepository.getByPetId(petId);
-};
-
-const getByOwnerId = async (ownerId: number) => {
-  return await petOwnerRepository.getByOwnerId(ownerId);
+  return await petRepository.getById(petId);
 };
 
 const update = async (pet: Pet) => {
@@ -33,12 +29,7 @@ const update = async (pet: Pet) => {
 };
 
 const deleteById = async (petId: number) => {
-  await petOwnerRepository.deletePet(petId);
   return await petRepository.deleteById(petId);
-};
-
-const deleteOwner = async (ownerId: number) => {
-  return await petOwnerRepository.deleteOwner(ownerId);
 };
 
 export const petService = {
@@ -46,8 +37,6 @@ export const petService = {
   getAll,
   getByPage,
   getById,
-  getByOwnerId,
   update,
   deleteById,
-  deleteOwner,
 };
