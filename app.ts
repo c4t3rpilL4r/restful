@@ -1,6 +1,7 @@
 import 'tsconfig-paths/register';
 import knex from './src/db_pg/knex-config';
 import express from 'express';
+import querystring from 'querystring';
 import { initRoutes } from './src/routes/index';
 
 const app = express();

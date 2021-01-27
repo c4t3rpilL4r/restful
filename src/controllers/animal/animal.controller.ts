@@ -1,5 +1,5 @@
-import { RequestHandler } from 'express';
-import { Animal, Pagination } from '@app/models';
+import { RequestHandler, Request } from 'express';
+import { Animal } from '@app/models';
 import { animalService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
@@ -24,15 +24,16 @@ const create: RequestHandler = async (req, res) => {
   }
 };
 
-const getAll: RequestHandler = async (req, res) => {
+const getAll: RequestHandler = async (req: Request, res) => {
   try {
     const { page, limit } = req.query;
-    const pagination: Pagination = {
-      page: +page,
-      limit,
-    };
+    let animals: Animal[];
 
-    const animals = await animalService.getByPage(pagination);
+    if (page && limit) {
+      animals = await animalService.getByPage(+page, +limit);
+    } else {
+      animals = await animalService.getAll();
+    }
 
     res.status(200).send(animals);
   } catch (err) {

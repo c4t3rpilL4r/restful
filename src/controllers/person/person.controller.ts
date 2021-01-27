@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Person, Pagination } from '@app/models';
+import { Person } from '@app/models';
 import { personService, petOwnerService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
@@ -18,18 +18,8 @@ const create: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req, res) => {
   try {
-    let persons: Person[];
-
-    if (req.query.page && req.query.limit) {
-      const pagination: Pagination = {
-        page: +req.query.page,
-        limit: +req.query.limit,
-      };
-
-      persons = await personService.getByPage(pagination);
-    } else {
-      persons = await personService.getAll();
-    }
+    const { page, limit } = req.query as any;
+    const persons = await personService.getByPage(page, limit);
 
     res.status(200).send(persons);
   } catch (err) {

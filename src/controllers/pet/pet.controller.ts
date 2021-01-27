@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Animal, Pagination, Pet, PetOwner } from '@app/models';
+import { Animal, Pet, PetOwner } from '@app/models';
 import {
   animalService,
   personService,
@@ -43,21 +43,13 @@ const create: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req, res) => {
   try {
-    let pagination: Pagination;
-    let pets: any[] = [];
-    const ownerId = req.query.ownerId ? +req.query.ownerId : 0;
+    const { page, limit, showOwnerId, ownerId } = req.query as any;
+    let pets: Pet[];
 
-    if (req.query.page && req.query.limit) {
-      pagination = {
-        page: +req.query.page,
-        limit: +req.query.limit,
-      };
-
-      pets = await petOwnerService.getByPage(pagination);
-    } else if (ownerId) {
-      pets = await petOwnerService.getByOwnerId(ownerId);
+    if (showOwnerId || ownerId) {
+      pets = await petOwnerService.getByPage(page, limit, showOwnerId, ownerId);
     } else {
-      pets = await petOwnerService.getAll();
+      pets = await petService.getByPage(page, limit);
     }
 
     res.status(200).send(pets);

@@ -1,4 +1,4 @@
-import { Pagination, Person } from '@app/models';
+import { Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (person: Person) => {
@@ -9,11 +9,14 @@ const getAll = async () => {
   return await knex('person').select();
 };
 
-const getByPage = async (pagination: Pagination) => {
-  return await knex('person')
-    .select()
-    .offset((pagination.page - 1) * pagination.limit)
-    .limit(pagination.limit);
+const getByPage = async (page: number, limit: number) => {
+  const query = knex('person');
+
+  if (page && limit) {
+    query.offset((page - 1) * limit).limit(limit);
+  }
+
+  return await query.select();
 };
 
 const getById = async (personId: number) => {

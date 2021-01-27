@@ -1,4 +1,4 @@
-import { Pagination, PetOwner } from '@app/models';
+import { PetOwner } from '@app/models';
 import { petOwnerRepository } from '@app/repositories';
 
 const create = async (petOwner: PetOwner) => {
@@ -9,8 +9,13 @@ const getAll = async () => {
   return await petOwnerRepository.getAll();
 };
 
-const getByPage = async (pagination: Pagination) => {
-  return await petOwnerRepository.getByPage(pagination);
+const getByPage = async (
+  page: number,
+  limit: number,
+  showOwnerId: boolean,
+  ownerId: number,
+) => {
+  return await petOwnerRepository.getByPage(page, limit, showOwnerId, ownerId);
 };
 
 const getByOwnerId = async (ownerId: number) => {

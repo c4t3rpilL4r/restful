@@ -1,4 +1,4 @@
-import { Pagination, PetOwner } from '@app/models';
+import { PetOwner } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (petOwner: PetOwner) => {
@@ -25,15 +25,31 @@ const getAll = async () => {
     .select('animal.type');
 };
 
-const getByPage = async (pagination: Pagination) => {
-  return await knex('pet_owner')
-    .select('ownerId')
+const getByPage = async (
+  page: number,
+  limit: number,
+  showOwnerId: boolean,
+  ownerId: number,
+) => {
+  const query = knex('pet_owner');
+
+  if (page && limit) {
+    query.offset((page - 1) * limit).limit(limit);
+  }
+
+  if (showOwnerId) {
+    query.select('ownerId');
+  }
+
+  if (ownerId) {
+    query.where({ ownerId });
+  }
+
+  return await query
     .join('pet', { petId: 'pet.id' })
     .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
-    .select('animal.type')
-    .offset((pagination.page - 1) * pagination.limit)
-    .limit(pagination.limit);
+    .select('animal.type');
 };
 
 const getByOwnerId = async (ownerId: number) => {

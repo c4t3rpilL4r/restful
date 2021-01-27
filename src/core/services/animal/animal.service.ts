@@ -1,4 +1,4 @@
-import { Animal, Pagination } from '@app/models';
+import { Animal } from '@app/models';
 import { animalRepository } from '@app/repositories';
 
 const create = async (animal: Animal) => {
@@ -9,8 +9,8 @@ const getAll = async () => {
   return await animalRepository.get();
 };
 
-const getByPage = async (pagination: Pagination) => {
-  return await animalRepository.getByPage(pagination);
+const getByPage = async (page: number, limit: number) => {
+  return await animalRepository.getByPage(page, limit);
 };
 
 const getById = async (animalId: number) => {
