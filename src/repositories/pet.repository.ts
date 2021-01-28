@@ -1,31 +1,25 @@
 import { Pet } from '@app/models';
 import knex from '../db_pg/knex-config';
 
+const query = knex('pet');
+
 const create = async (pet: Pet) => {
-  return await knex('pet').insert(pet).returning('*');
+  return await query.insert(pet).returning('*');
 };
 
-const getAll = async () => {
-  return await knex('pet')
-    .join('animal', { animalId: 'animal.id' })
-    .select('pet.id', 'pet.name', 'animal.type');
-};
-
-const getByPage = async (page: number, limit: number) => {
-  const query = knex('pet');
-
+const getAll = async (page: number, limit: number) => {
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return query
+  return await query
     .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
     .select('animal.type');
 };
 
 const getById = async (petId: number) => {
-  return await knex('pet')
+  return await query
     .where({ 'pet.id': petId })
     .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
@@ -33,12 +27,12 @@ const getById = async (petId: number) => {
 };
 
 const update = async (pet: Pet) => {
-  const updatedPet = await knex('pet')
+  const updatedPet = await query
     .where({ id: pet.id })
     .update(pet)
     .returning('*');
 
-  return await knex('pet')
+  return await query
     .where({ 'pet.id': updatedPet[0].id })
     .select('pet.id', 'pet.name')
     .join('animal', { animalId: 'animal.id' })
@@ -46,13 +40,12 @@ const update = async (pet: Pet) => {
 };
 
 const deleteById = async (petId: number) => {
-  return await knex('pet').where({ id: petId }).del();
+  return await query.where({ id: petId }).del();
 };
 
 export const petRepository = {
   create,
   getAll,
-  getByPage,
   getById,
   update,
   deleteById,

@@ -1,23 +1,12 @@
 import { Pet, PetOwner } from '@app/models';
-import { petRepository, petOwnerRepository } from '@app/repositories';
+import { petRepository } from '@app/repositories';
 
-const create = async (personId: number, pet: Pet) => {
-  const newPet = await petRepository.create(pet);
-
-  const petOwner: PetOwner = {
-    ownerId: personId,
-    petId: newPet[0].id,
-  };
-
-  return await petOwnerRepository.create(petOwner);
+const create = async (pet: Pet) => {
+  return await petRepository.create(pet);
 };
 
-const getAll = async () => {
-  return await petOwnerRepository.getAll();
-};
-
-const getByPage = async (page: number, limit: number) => {
-  return await petRepository.getByPage(page, limit);
+const getAll = async (page: number, limit: number) => {
+  return await petRepository.getAll(page, limit);
 };
 
 const getById = async (petId: number) => {
@@ -35,7 +24,6 @@ const deleteById = async (petId: number) => {
 export const petService = {
   create,
   getAll,
-  getByPage,
   getById,
   update,
   deleteById,

@@ -1,4 +1,4 @@
 export class PetOwner {
-  ownerId!: number;
-  petId!: number;
+  ownerId?: number;
+  petId?: number;
 }

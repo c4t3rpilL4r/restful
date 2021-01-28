@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Person } from '@app/models';
+import { Person, PetOwner } from '@app/models';
 import { personService, petOwnerService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
@@ -19,7 +19,7 @@ const create: RequestHandler = async (req, res) => {
 const getAll: RequestHandler = async (req, res) => {
   try {
     const { page, limit } = req.query as any;
-    const persons = await personService.getByPage(page, limit);
+    const persons = await personService.getAll(page, limit);
 
     res.status(200).send(persons);
   } catch (err) {
@@ -35,11 +35,6 @@ const getById: RequestHandler = async (req, res) => {
     const personId = +req.params.personId;
     const person = await personService.getById(personId);
 
-    if (!person.length) {
-      res.status(404).send({ message: 'Person not found.' });
-      return;
-    }
-
     res.status(200).send(person);
   } catch (err) {
     res.status(500).send({
@@ -52,15 +47,8 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const person = await personService.getById(personId);
-
-    if (!person.length) {
-      res.status(404).send({ message: 'Person not found.' });
-      return;
-    }
-
     const updatedPersonDetails: Person = {
-      id: person[0].id,
+      id: personId,
       ...req.body,
     };
 
@@ -78,14 +66,11 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const person = await personService.getById(personId);
+    const petOwner: PetOwner = {
+      ownerId: personId,
+    };
 
-    if (!person.length) {
-      res.status(404).send({ message: 'Person not found.' });
-      return;
-    }
-
-    await petOwnerService.deleteByOwnerId(personId);
+    await petOwnerService.deletePetAndOrOwner(petOwner);
     await personService.deleteById(personId);
 
     res.status(200).send({ message: 'Person deletion successful.' });

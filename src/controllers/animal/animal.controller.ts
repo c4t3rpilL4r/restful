@@ -4,14 +4,6 @@ import { animalService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
   try {
-    const animalType = req.body.type;
-    const animal = await animalService.getByType(animalType);
-
-    if (animal.length) {
-      res.status(409).send({ message: 'Animal registered already.' });
-      return;
-    }
-
     const newAnimalDetails: Animal = { ...req.body };
     const newAnimal = await animalService.create(newAnimalDetails);
 
@@ -26,14 +18,8 @@ const create: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req: Request, res) => {
   try {
-    const { page, limit } = req.query;
-    let animals: Animal[];
-
-    if (page && limit) {
-      animals = await animalService.getByPage(+page, +limit);
-    } else {
-      animals = await animalService.getAll();
-    }
+    const { page, limit } = req.query as any;
+    const animals = await animalService.getAll(+page, +limit);
 
     res.status(200).send(animals);
   } catch (err) {
@@ -49,11 +35,6 @@ const getById: RequestHandler = async (req, res) => {
     const animalId = +req.params.animalId;
     const animal = await animalService.getById(animalId);
 
-    if (!animal.length) {
-      res.status(400).send({ message: 'Animal not found' });
-      return;
-    }
-
     res.status(200).send(animal);
   } catch (err) {
     res.status(500).send({
@@ -66,13 +47,6 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
-    const animal = await animalService.getById(animalId);
-
-    if (!animal.length) {
-      res.status(404).send({ message: 'Animal not found.' });
-      return;
-    }
-
     const updatedAnimalDetails: Animal = {
       id: animalId,
       ...req.body,
@@ -92,12 +66,6 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
-    const animal = await animalService.getById(animalId);
-
-    if (!animal.length) {
-      res.status(404).send({ message: 'Animal not found.' });
-      return;
-    }
 
     await animalService.deleteById(animalId);
 

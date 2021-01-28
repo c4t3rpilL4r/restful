@@ -5,12 +5,8 @@ const create = async (person: Person) => {
   return await personRepository.create(person);
 };
 
-const getAll = async () => {
-  return await personRepository.getAll();
-};
-
-const getByPage = async (page: number, limit: number) => {
-  return await personRepository.getByPage(page, limit);
+const getAll = async (page: number, limit: number) => {
+  return await personRepository.getAll(page, limit);
 };
 
 const getById = async (personId: number) => {
@@ -27,7 +23,6 @@ const deleteById = async (personId: number) => {
 
 export const personService = {
   getAll,
-  getByPage,
   getById,
   create,
   update,

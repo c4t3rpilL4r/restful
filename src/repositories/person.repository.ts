@@ -5,11 +5,7 @@ const create = async (person: Person) => {
   return await knex('person').insert(person).returning('*');
 };
 
-const getAll = async () => {
-  return await knex('person').select();
-};
-
-const getByPage = async (page: number, limit: number) => {
+const getAll = async (page: number, limit: number) => {
   const query = knex('person');
 
   if (page && limit) {
@@ -37,7 +33,6 @@ const deleteById = async (personId: number) => {
 export const personRepository = {
   create,
   getAll,
-  getByPage,
   getById,
   update,
   deleteById,

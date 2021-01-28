@@ -11,7 +11,9 @@
       "@app/controllers": ["src/controllers"],
       "@app/models": ["src/core/models"],
       "@app/repositories": ["src/repositories"],
-      "@app/services": ["src/core/services"]
+      "@app/services": ["src/core/services"],
+      "@app/interfaces": ["src/core/interfaces"],
+      "@app/utils": ["src/utils"]
     }
   }
 }

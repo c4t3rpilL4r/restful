@@ -1,8 +1,8 @@
 import 'tsconfig-paths/register';
 import knex from './src/db_pg/knex-config';
-import express from 'express';
-import querystring from 'querystring';
+import express, { Request, Response, NextFunction } from 'express';
 import { initRoutes } from './src/routes/index';
+import { IError } from '@app/interfaces';
 
 const app = express();
 const port = 3000;
@@ -28,6 +28,10 @@ const startApp = async () => {
   app.use(express.json());
 
   initRoutes(app);
+
+  app.use((err: IError, req: Request, res: Response, next: NextFunction) => {
+    res.status(err.code).send({ message: err.message });
+  });
 
   app.listen(port, () => {
     // tslint:disable-next-line:no-console

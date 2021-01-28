@@ -1,5 +1,6 @@
 import express from 'express';
 import { personController } from '@app/controllers';
+import { requestValidator } from '@app/utils';
 
 const router = express.Router();
 
@@ -8,12 +9,24 @@ router.post('/persons', personController.create);
 
 // READ
 router.get('/persons', personController.getAll);
-router.get('/persons/:personId', personController.getById);
+router.get(
+  '/persons/:personId',
+  requestValidator.checkPersonIfExisting,
+  personController.getById,
+);
 
 // UPDATE
-router.put('/persons/:personId', personController.update);
+router.put(
+  '/persons/:personId',
+  requestValidator.checkPersonIfExisting,
+  personController.update,
+);
 
 // DELETE
-router.delete('/persons/:personId', personController.deleteById);
+router.delete(
+  '/persons/:personId',
+  requestValidator.checkPersonIfExisting,
+  personController.deleteById,
+);
 
 export const personRouter = router;

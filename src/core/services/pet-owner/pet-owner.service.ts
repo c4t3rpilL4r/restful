@@ -5,51 +5,26 @@ const create = async (petOwner: PetOwner) => {
   return await petOwnerRepository.create(petOwner);
 };
 
-const getAll = async () => {
-  return await petOwnerRepository.getAll();
-};
-
-const getByPage = async (
+const getAll = async (
   page: number,
   limit: number,
+  petOwner: PetOwner,
   showOwnerId: boolean,
-  ownerId: number,
 ) => {
-  return await petOwnerRepository.getByPage(page, limit, showOwnerId, ownerId);
+  return await petOwnerRepository.getAll(page, limit, petOwner, showOwnerId);
 };
 
-const getByOwnerId = async (ownerId: number) => {
-  return await petOwnerRepository.getByOwnerId(ownerId);
+const getPetAndOrOwner = async (petOwner: PetOwner) => {
+  return await petOwnerRepository.getPetAndOrOwner(petOwner);
 };
 
-const getByPetId = async (petId: number) => {
-  return await petOwnerRepository.getByPetId(petId);
-};
-
-const getPetAndOwner = async (petOwner: PetOwner) => {
-  return await petOwnerRepository.getPetAndOwner(petOwner);
-};
-
-const deleteByOwnerId = async (ownerId: number) => {
-  return await petOwnerRepository.deleteByOwnerId(ownerId);
-};
-
-const deleteByPetId = async (petId: number) => {
-  return await petOwnerRepository.deleteByPetId(petId);
-};
-
-const deletePetAndOwner = async (petOwner: PetOwner) => {
-  return await petOwnerRepository.deletePetAndOwner(petOwner);
+const deletePetAndOrOwner = async (petOwner: PetOwner) => {
+  return await petOwnerRepository.deletePetAndOrOwner(petOwner);
 };
 
 export const petOwnerService = {
   create,
   getAll,
-  getByPage,
-  getByOwnerId,
-  getByPetId,
-  getPetAndOwner,
-  deleteByOwnerId,
-  deleteByPetId,
-  deletePetAndOwner,
+  getPetAndOrOwner,
+  deletePetAndOrOwner,
 };
