@@ -58,7 +58,7 @@ const getAll: RequestHandler = async (req, res) => {
     const { page, limit, showOwnerId, ownerId } = req.query as any;
     let pets: Pet[];
 
-    if (showOwnerId) {
+    if (showOwnerId || ownerId) {
       const petOwner: PetOwner = {
         ownerId,
       };
@@ -76,10 +76,23 @@ const getAll: RequestHandler = async (req, res) => {
 
 const getById: RequestHandler = async (req, res) => {
   try {
+    const { ownerId } = req.query as any;
     const petId = +req.params.petId;
-    const pet = await petService.getById(petId);
 
-    res.status(200).send(pet);
+    if (ownerId) {
+      const petOwnerDetails: PetOwner = {
+        ownerId,
+        petId,
+      };
+
+      const petOwner = await petOwnerService.getPetAndOrOwner(petOwnerDetails);
+
+      res.status(200).send(petOwner);
+    } else {
+      const pet = await petService.getById(petId);
+
+      res.status(200).send(pet);
+    }
   } catch (err) {
     res.status(500).send({ message: 'Error fetching pet data.', error: err });
   }
@@ -144,7 +157,16 @@ const deleteByOwnerId: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
+    const { ownerId } = req.query as any;
+    const petOwnerDetails: PetOwner = {
+      petId,
+    };
 
+    if (ownerId) {
+      petOwnerDetails.ownerId = ownerId;
+    }
+
+    await petOwnerService.deletePetAndOrOwner(petOwnerDetails);
     await petService.deleteById(petId);
 
     res.status(200).send({ message: 'Pet deletion successful.' });

@@ -1,22 +1,11 @@
-import { PetOwner } from '@app/models';
 import knex from '../db_pg/knex-config';
-
-const query = knex('pet_owner');
-
-const filterQuery = (petOwner: PetOwner) => {
-  if (petOwner.ownerId && petOwner.petId) {
-    query.where({ ownerId: petOwner.ownerId, petId: petOwner.petId });
-  } else if (petOwner.ownerId) {
-    query.where({ ownerId: petOwner.ownerId });
-  } else if (petOwner.petId) {
-    query.where({ petId: petOwner.petId });
-  }
-};
+import { PetOwner } from '@app/models';
+import { query } from 'express';
 
 const create = async (petOwner: PetOwner) => {
-  const newPetOwner = await query.insert(petOwner).returning('*');
+  const newPetOwner = await knex('pet_owner').insert(petOwner).returning('*');
 
-  return await query
+  return await knex('pet_owner')
     .where({
       ownerId: newPetOwner[0].ownerId,
       petId: newPetOwner[0].petId,
@@ -28,17 +17,20 @@ const create = async (petOwner: PetOwner) => {
     .select('animal.type');
 };
 
+// rename to getbypage
 const getAll = async (
   page: number,
   limit: number,
   petOwner: PetOwner,
-  showOwnerId: boolean,
+  includeOwnerId?: boolean,
 ) => {
+  const query = knex('pet_owner');
+
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  if (showOwnerId) {
+  if (includeOwnerId) {
     query.select('ownerId');
   }
 
@@ -53,18 +45,77 @@ const getAll = async (
     .select('animal.type');
 };
 
-const getPetAndOrOwner = async (petOwner: PetOwner) => {
-  filterQuery(petOwner);
+const getPet = async (petId: number) => {
+  return await knex('pet_owner')
+    .where({ petId })
+    .join('animal', { animalId: 'animal.id' })
+    .select('pet.id', 'pet.name', 'animal.type');
+};
 
-  return await query
+const getOwner = async (ownerId: number) => {
+  return await knex('pet_owner')
+    .where({ ownerId })
+    .join('person', { ownerId: 'person.id' })
+    .select('ownerId', 'person.firstName', 'person.lastName');
+};
+
+const getPetByPetOwner = async (petOwner: PetOwner) => {
+  return await knex('pet_owner')
+    .where({ ownerId: petOwner.ownerId, petId: petOwner.petId })
     .join('pet', { petId: 'pet.id' })
-    .select('pet.id', 'pet.name')
+    .select('pet.name')
     .join('animal', { animalId: 'animal.id' })
     .select('animal.type');
 };
 
+// rename to findOne
+// findAll
+const getPetAndOrOwner = async (petOwner: PetOwner) => {
+  const query = knex('pet_owner');
+
+  if (petOwner.ownerId && petOwner.petId) {
+    if (petOwner.ownerId > 0) {
+      query
+        .where({
+          ownerId: petOwner.ownerId,
+          petId: petOwner.petId,
+        })
+        .join('pet', { petId: 'pet.id' })
+        .select('pet.name')
+        .join('animal', { animalId: 'animal.id' })
+        .select('animal.type');
+    } else {
+      query
+        .where({ petId: petOwner.petId })
+        .join('person', { ownerId: 'person.id' })
+        .select('person.id', 'person.firstName', 'person.lastName');
+    }
+  } else if (petOwner.ownerId) {
+    query
+      .where({ ownerId: petOwner.ownerId })
+      .join('pet', { petId: 'pet.id' })
+      .select('pet.id', 'pet.name')
+      .join('animal', { animalId: 'animal.id' })
+      .select('animal.type');
+  } else if (petOwner.petId) {
+    query.where({ petId: petOwner.petId });
+  }
+
+  return await query;
+};
+
+// deleteOne
+// deleteAll
 const deletePetAndOrOwner = async (petOwner: PetOwner) => {
-  filterQuery(petOwner);
+  const query = knex('pet_owner');
+
+  if (petOwner.ownerId && petOwner.petId) {
+    query.where({ ownerId: petOwner.ownerId, petId: petOwner.petId });
+  } else if (petOwner.ownerId) {
+    query.where({ ownerId: petOwner.ownerId });
+  } else if (petOwner.petId) {
+    query.where({ petId: petOwner.petId });
+  }
 
   return query.del();
 };

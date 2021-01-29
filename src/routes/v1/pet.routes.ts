@@ -8,7 +8,8 @@ const router = express.Router();
 router.post('/pets', petController.create);
 router.post(
   '/pets/:petId',
-  requestValidator.checkPetOwnerIfExisting,
+  requestValidator.checkPersonIfExisting,
+  requestValidator.checkPetIfExisting,
   petController.addOwner,
 );
 
@@ -36,6 +37,7 @@ router.delete(
 router.delete(
   '/pets/:petId',
   requestValidator.checkPetIfExisting,
+  requestValidator.checkPetOwnerIfExisting,
   petController.deleteById,
 );
 

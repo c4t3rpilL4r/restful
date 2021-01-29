@@ -82,10 +82,15 @@ const error: IError = {
 const checkPersonIfExisting: RequestHandler = async (req, res, next) => {
   try {
     const personId =
-      req.query.personId ?? req.params.personId ?? req.body.personId;
+      req.query.personId ??
+      req.params.personId ??
+      req.body.personId ??
+      req.query.ownerId ??
+      req.params.ownerId ??
+      req.body.ownerId;
     const person = await personService.getById(+personId);
 
-    if (!person.length) {
+    if (!personId || !person.length) {
       error.message = 'Person not found.';
 
       next(error);
@@ -102,7 +107,7 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
     const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
     const pet = await petService.getById(+petId);
 
-    if (!pet.length) {
+    if (!petId || !pet.length) {
       error.message = 'Pet not found.';
       next(error);
     }
@@ -116,20 +121,7 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
 const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
   try {
     const ownerId = req.query.ownerId ?? req.params.ownerId ?? req.body.ownerId;
-    const owner = await personService.getById(+ownerId);
-
-    if (!ownerId || !owner.length) {
-      error.message = 'Person not found.';
-      next(error);
-    }
-
     const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
-    const pet = await petService.getById(+petId);
-
-    if (!petId || !pet.length) {
-      error.message = 'Pet not found.';
-      next(error);
-    }
 
     const petOwnerDetails: PetOwner = {
       ownerId: +ownerId,
@@ -169,10 +161,11 @@ const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {
 
 const checkAnimalTypeIfExisting: RequestHandler = async (req, res, next) => {
   try {
-    const { animalType } = req.body;
-    const animal = await animalService.getByType(animalType);
+    const { type } = req.body;
+    const animal = await animalService.getByType(type);
 
     if (animal.length) {
+      error.code = 409;
       error.message = 'Animal type already existing in db.';
       next(error);
     }
