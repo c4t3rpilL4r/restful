@@ -5,12 +5,16 @@ import { petController } from '@app/controllers';
 const router = express.Router();
 
 // CREATE
-router.post('/pets', petController.create);
+router.post(
+  '/pets',
+  requestValidator.checkPersonIfExisting,
+  petController.create,
+);
 router.post(
   '/pets/:petId',
   requestValidator.checkPersonIfExisting,
   requestValidator.checkPetIfExisting,
-  petController.addOwner,
+  petController.addOwnerToPet,
 );
 
 // READ
@@ -37,7 +41,7 @@ router.delete(
 router.delete(
   '/pets/:petId',
   requestValidator.checkPetIfExisting,
-  requestValidator.checkPetOwnerIfExisting,
+  requestValidator.checkPersonIfExisting,
   petController.deleteById,
 );
 

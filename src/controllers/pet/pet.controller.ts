@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Animal, Pet, PetOwner } from '@app/models';
-import { animalService, petOwnerService, petService } from '@app/services';
+import { animalService, petService, personService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -16,38 +16,35 @@ const create: RequestHandler = async (req, res) => {
     }
 
     const newPetDetails: Pet = {
+      ownerId,
       name,
       animalId: animal[0].id,
     };
 
     const newPet = await petService.create(newPetDetails);
 
-    const newPetOwnerDetails: PetOwner = {
-      ownerId,
-      petId: newPet[0].id,
-    };
-
-    const newPetOwner = await petOwnerService.create(newPetOwnerDetails);
-
-    res.status(200).send(newPetOwner);
+    res.status(200).send(newPet);
   } catch (err) {
     res.status(500).send({ message: 'Error creating pet data.', error: err });
   }
 };
 
-const addOwner: RequestHandler = async (req, res) => {
+const addOwnerToPet: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-    const ownerId = +req.body.ownerId;
+    const pet = await petService.getById(petId);
 
-    const newOwnerDetails: PetOwner = {
-      ownerId,
-      petId,
+    const ownerId = +req.body.ownerId;
+    const owner = await personService.getById(ownerId);
+
+    const newPetOwner: PetOwner = {
+      owner: owner[0],
+      pet: pet[0],
     };
 
-    const newPetOwner = await petOwnerService.create(newOwnerDetails);
+    const petOwner = await petService.addOwnerToPet(newPetOwner);
 
-    res.status(200).send(newPetOwner);
+    res.status(200).send(petOwner);
   } catch (err) {
     res.status(500).send({ message: 'Error adding owner to pet.', error: err });
   }
@@ -55,15 +52,18 @@ const addOwner: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req, res) => {
   try {
-    const { page, limit, showOwnerId, ownerId } = req.query as any;
+    const { page, limit, includeOwnerId, ownerId } = req.query as any;
     let pets: Pet[];
 
-    if (showOwnerId || ownerId) {
-      const petOwner: PetOwner = {
+    if (ownerId) {
+      pets = await petService.getByOwnerId(
         ownerId,
-      };
-
-      pets = await petOwnerService.getAll(page, limit, petOwner, showOwnerId);
+        includeOwnerId,
+        page,
+        limit,
+      );
+    } else if (includeOwnerId) {
+      pets = await petService.getAllIncludingOwnerId(page, limit);
     } else {
       pets = await petService.getAll(page, limit);
     }
@@ -76,23 +76,10 @@ const getAll: RequestHandler = async (req, res) => {
 
 const getById: RequestHandler = async (req, res) => {
   try {
-    const { ownerId } = req.query as any;
     const petId = +req.params.petId;
+    const pet = await petService.getById(petId);
 
-    if (ownerId) {
-      const petOwnerDetails: PetOwner = {
-        ownerId,
-        petId,
-      };
-
-      const petOwner = await petOwnerService.getPetAndOrOwner(petOwnerDetails);
-
-      res.status(200).send(petOwner);
-    } else {
-      const pet = await petService.getById(petId);
-
-      res.status(200).send(pet);
-    }
+    res.status(200).send(pet);
   } catch (err) {
     res.status(500).send({ message: 'Error fetching pet data.', error: err });
   }
@@ -101,25 +88,6 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-
-    if (req.query.ownerId) {
-      const currentOwner: PetOwner = {
-        ownerId: +req.query.ownerId,
-        petId,
-      };
-
-      await petOwnerService.deletePetAndOrOwner(currentOwner);
-
-      if (req.body.ownerId && +req.body.ownerId !== currentOwner.ownerId) {
-        const newOwner: PetOwner = {
-          ownerId: +req.body.ownerId,
-          petId,
-        };
-
-        await petOwnerService.create(newOwner);
-      }
-    }
-
     const updatedPetDetails: Pet = {
       id: petId,
       ...req.body,
@@ -136,38 +104,16 @@ const update: RequestHandler = async (req, res) => {
   }
 };
 
-const deleteByOwnerId: RequestHandler = async (req, res) => {
-  try {
-    const { ownerId } = req.query as any;
-    const petOwner: PetOwner = {
-      ownerId: +ownerId,
-    };
-
-    await petOwnerService.deletePetAndOrOwner(petOwner);
-
-    res.status(200).send({ message: 'Pets deletion successful.' });
-  } catch (err) {
-    res.status(500).send({
-      message: 'Error deleting pet data.',
-      error: err,
-    });
-  }
-};
-
 const deleteById: RequestHandler = async (req, res) => {
   try {
-    const petId = +req.params.petId;
     const { ownerId } = req.query as any;
-    const petOwnerDetails: PetOwner = {
-      petId,
-    };
+    const petId = +req.params.petId;
 
     if (ownerId) {
-      petOwnerDetails.ownerId = ownerId;
+      await petService.deletePetAndOwner(petId, +ownerId);
+    } else {
+      await petService.deleteById(petId);
     }
-
-    await petOwnerService.deletePetAndOrOwner(petOwnerDetails);
-    await petService.deleteById(petId);
 
     res.status(200).send({ message: 'Pet deletion successful.' });
   } catch (err) {
@@ -178,12 +124,27 @@ const deleteById: RequestHandler = async (req, res) => {
   }
 };
 
+const deleteByOwnerId: RequestHandler = async (req, res) => {
+  try {
+    const { ownerId } = req.query as any;
+
+    await petService.deleteByOwnerId(ownerId);
+
+    res.status(200).send({ message: 'Pets deletion successful.' });
+  } catch (err) {
+    res.status(500).send({
+      message: 'Error deleting pet data.',
+      error: err,
+    });
+  }
+};
+
 export const petController = {
   create,
-  addOwner,
+  addOwnerToPet,
   getAll,
   getById,
   update,
-  deleteByOwnerId,
   deleteById,
+  deleteByOwnerId,
 };

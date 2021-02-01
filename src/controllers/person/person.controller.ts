@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
-import { Person, PetOwner } from '@app/models';
-import { personService, petOwnerService } from '@app/services';
+import { Person } from '@app/models';
+import { personService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -18,8 +18,16 @@ const create: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req, res) => {
   try {
-    const { page, limit } = req.query as any;
-    const persons = await personService.getAll(page, limit);
+    const { page, limit, petOwnersOnly, petId } = req.query as any;
+    let persons: Person[];
+
+    if (petId) {
+      persons = await personService.getByPetId(petId);
+    } else if (petOwnersOnly) {
+      persons = await personService.getPetOwners(page, limit);
+    } else {
+      persons = await personService.getAll(page, limit);
+    }
 
     res.status(200).send(persons);
   } catch (err) {
@@ -66,11 +74,7 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const petOwner: PetOwner = {
-      ownerId: personId,
-    };
 
-    await petOwnerService.deletePetAndOrOwner(petOwner);
     await personService.deleteById(personId);
 
     res.status(200).send({ message: 'Person deletion successful.' });

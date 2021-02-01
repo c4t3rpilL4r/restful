@@ -5,8 +5,16 @@ const create = async (person: Person) => {
   return await personRepository.create(person);
 };
 
-const getAll = async (page: number, limit: number) => {
+const getAll = async (page?: number, limit?: number) => {
   return await personRepository.getAll(page, limit);
+};
+
+const getPetOwners = async (page?: number, limit?: number) => {
+  return await personRepository.getPetOwners(page, limit);
+};
+
+const getByPetId = async (petId: number) => {
+  return await personRepository.getByPetId(petId);
 };
 
 const getById = async (personId: number) => {
@@ -23,6 +31,8 @@ const deleteById = async (personId: number) => {
 
 export const personService = {
   getAll,
+  getPetOwners,
+  getByPetId,
   getById,
   create,
   update,
