@@ -1,5 +1,5 @@
 import { IError } from '@app/interfaces';
-import { PersonPet, Pet } from '@app/models';
+import { PersonPet, Pet } from 'src/db_pg/models';
 import { personService, petService, animalService } from '@app/services';
 import { RequestHandler } from 'express';
 

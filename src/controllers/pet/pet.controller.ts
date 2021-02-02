@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
-import { Animal, Pet, PersonPet } from '@app/models';
+import { Pet, PersonPet } from 'src/db_pg/models';
 import { animalService, petService } from '@app/services';
+import { IAnimal, IPet } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -8,14 +9,14 @@ const create: RequestHandler = async (req, res) => {
     let animal = await animalService.getByType(animalType);
 
     if (!animal.length) {
-      const newAnimalDetails: Animal = {
+      const newAnimalDetails: IAnimal = {
         type: animalType,
       };
 
       animal = await animalService.create(newAnimalDetails);
     }
 
-    const newPetDetails: Pet = {
+    const newPetDetails: IPet = {
       name,
       animalId: animal[0].id,
     };

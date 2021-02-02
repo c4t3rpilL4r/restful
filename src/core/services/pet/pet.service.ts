@@ -1,7 +1,8 @@
-import { Pet, PersonPet } from '@app/models';
+import { Pet, PersonPet } from 'src/db_pg/models';
 import { petRepository } from '@app/repositories';
+import { IPet } from '@app/interfaces';
 
-const create = async (pet: Pet) => {
+const create = async (pet: IPet) => {
   return await petRepository.create(pet);
 };
 

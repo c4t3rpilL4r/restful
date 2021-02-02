@@ -1,4 +1,4 @@
-import { Person } from '@app/models';
+import { Person } from 'src/db_pg/models';
 import { personRepository } from '@app/repositories';
 
 const create = async (person: Person) => {

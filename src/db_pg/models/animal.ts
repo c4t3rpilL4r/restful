@@ -1,4 +1,4 @@
 export class Animal {
-  id?: number;
+  id!: number;
   type!: string;
 }

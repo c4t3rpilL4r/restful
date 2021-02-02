@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Person } from '@app/models';
+import { Person } from 'src/db_pg/models';
 import { personService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {

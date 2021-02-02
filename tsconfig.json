@@ -9,7 +9,7 @@
     "baseUrl": "./",
     "paths": {
       "@app/controllers": ["src/controllers"],
-      "@app/models": ["src/core/models"],
+      "@app/models": ["src/db_pg/models"],
       "@app/repositories": ["src/repositories"],
       "@app/services": ["src/core/services"],
       "@app/interfaces": ["src/core/interfaces"],

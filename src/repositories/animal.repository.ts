@@ -1,7 +1,7 @@
-import { Animal } from '@app/models';
+import { IAnimal } from '@app/interfaces';
 import knex from '../db_pg/knex-config';
 
-const create = async (animal: Animal) => {
+const create = async (animal: IAnimal) => {
   return await knex('animal').insert(animal).returning('*');
 };
 
@@ -23,7 +23,7 @@ const getByType = async (animalType: string) => {
   return await knex('animal').where({ type: animalType });
 };
 
-const update = async (animal: Animal) => {
+const update = async (animal: IAnimal) => {
   return await knex('animal')
     .where({ id: animal.id })
     .update(animal)

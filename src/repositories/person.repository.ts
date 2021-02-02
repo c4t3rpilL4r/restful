@@ -1,12 +1,13 @@
-import { Person } from '@app/models';
+import { IPerson } from '@app/interfaces';
+import { Person, PersonPet } from 'src/db_pg/models';
 import knex from '../db_pg/knex-config';
 
-const create = async (person: Person) => {
-  return await knex('person').insert(person).returning('*');
+const create = async (person: IPerson) => {
+  return await knex<Person>('person').insert(person).returning('*');
 };
 
 const getAll = async (page?: number, limit?: number) => {
-  const query = knex('person');
+  const query = knex<Person>('person');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
@@ -16,7 +17,7 @@ const getAll = async (page?: number, limit?: number) => {
 };
 
 const getPetOwners = async (page?: number, limit?: number) => {
-  const query = knex('pet_owner');
+  const query = knex<PersonPet>('person_pet');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
@@ -29,7 +30,7 @@ const getPetOwners = async (page?: number, limit?: number) => {
 };
 
 const getByPetId = async (petId: number) => {
-  return await knex('pet_owner')
+  return await knex('person_pet')
     .where({ petId })
     .join('person', { ownerId: 'person.id' })
     .select('person.id', 'person.firstName', 'person.lastName');
@@ -47,7 +48,7 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  await knex('pet_owner').where({ ownerId: personId }).del();
+  await knex('person_pet').where({ ownerId: personId }).del();
   return await knex('person').where({ id: personId }).del();
 };
 
