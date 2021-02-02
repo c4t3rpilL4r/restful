@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
-import { Animal, Pet, PetOwner } from '@app/models';
-import { animalService, petService, personService } from '@app/services';
+import { Animal, Pet, PersonPet } from '@app/models';
+import { animalService, petService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -16,14 +16,20 @@ const create: RequestHandler = async (req, res) => {
     }
 
     const newPetDetails: Pet = {
-      ownerId,
       name,
       animalId: animal[0].id,
     };
 
     const newPet = await petService.create(newPetDetails);
 
-    res.status(200).send(newPet);
+    const newPersonPetDetails: PersonPet = {
+      ownerId,
+      petId: newPet[0].id,
+    };
+
+    const newPersonPet = await petService.addOwnerToPet(newPersonPetDetails);
+
+    res.status(200).send(newPersonPet);
   } catch (err) {
     res.status(500).send({ message: 'Error creating pet data.', error: err });
   }
@@ -32,14 +38,11 @@ const create: RequestHandler = async (req, res) => {
 const addOwnerToPet: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-    const pet = await petService.getById(petId);
-
     const ownerId = +req.body.ownerId;
-    const owner = await personService.getById(ownerId);
 
-    const newPetOwner: PetOwner = {
-      owner: owner[0],
-      pet: pet[0],
+    const newPetOwner: PersonPet = {
+      ownerId,
+      petId,
     };
 
     const petOwner = await petService.addOwnerToPet(newPetOwner);
@@ -56,12 +59,7 @@ const getAll: RequestHandler = async (req, res) => {
     let pets: Pet[];
 
     if (ownerId) {
-      pets = await petService.getByOwnerId(
-        ownerId,
-        includeOwnerId,
-        page,
-        limit,
-      );
+      pets = await petService.getByOwnerId(ownerId, page, limit);
     } else if (includeOwnerId) {
       pets = await petService.getAllIncludingOwnerId(page, limit);
     } else {
@@ -110,10 +108,10 @@ const deleteById: RequestHandler = async (req, res) => {
     const petId = +req.params.petId;
 
     if (ownerId) {
-      await petService.deletePetAndOwner(petId, +ownerId);
-    } else {
-      await petService.deleteById(petId);
+      await petService.deleteOwnership(+ownerId, petId);
     }
+
+    await petService.deleteById(petId);
 
     res.status(200).send({ message: 'Pet deletion successful.' });
   } catch (err) {
@@ -124,11 +122,11 @@ const deleteById: RequestHandler = async (req, res) => {
   }
 };
 
-const deleteByOwnerId: RequestHandler = async (req, res) => {
+const deleteOwnership: RequestHandler = async (req, res) => {
   try {
     const { ownerId } = req.query as any;
 
-    await petService.deleteByOwnerId(ownerId);
+    await petService.deleteOwnership(+ownerId);
 
     res.status(200).send({ message: 'Pets deletion successful.' });
   } catch (err) {
@@ -146,5 +144,5 @@ export const petController = {
   getById,
   update,
   deleteById,
-  deleteByOwnerId,
+  deleteByOwnerId: deleteOwnership,
 };

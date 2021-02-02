@@ -1,5 +1,5 @@
 import { IError } from '@app/interfaces';
-import { PetOwner } from '@app/models';
+import { PersonPet, Pet } from '@app/models';
 import { personService, petService, animalService } from '@app/services';
 import { RequestHandler } from 'express';
 
@@ -18,7 +18,7 @@ const checkPersonIfExisting: RequestHandler = async (req, res, next) => {
       req.body.ownerId;
     const person = await personService.getById(+personId);
 
-    if (!personId || !person.length) {
+    if (!person.length) {
       error.message = 'Person not found.';
 
       next(error);
@@ -35,7 +35,7 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
     const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
     const pet = await petService.getById(+petId);
 
-    if (!petId || !pet.length) {
+    if (!pet.length) {
       error.message = 'Pet not found.';
       next(error);
     }
@@ -49,23 +49,27 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
 const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
   try {
     const ownerId = req.query.ownerId ?? req.params.ownerId ?? req.body.ownerId;
-    const owner = await personService.getById(+ownerId);
-
-    if (!ownerId || !owner.length) {
-      error.message = 'Person not found.';
-
-      next(error);
-    }
-
     const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
-    const pet = await petService.getById(+petId);
 
-    if (!petId || !pet.length) {
-      error.message = 'Pet not found.';
+    const pets = await petService.getByOwnerId(+ownerId);
+
+    if (!pets.length) {
+      error.message = 'Person does not own any pet.';
       next(error);
     }
 
-    const petIds = await petService.getByOwnerId(+ownerId);
+    const found = pets.find((ownerPet: Pet) => {
+      if (!ownerPet.id) {
+        return;
+      }
+
+      return +ownerPet.id === +petId;
+    });
+
+    if (!found) {
+      error.message = 'Pet not owned by person.';
+      next(error);
+    }
 
     next();
   } catch (err) {
@@ -73,24 +77,6 @@ const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
       .status(500)
       .send({ message: 'Error verifying pet and owner.', error: err });
   }
-  // try {
-  //   const ownerId = req.query.ownerId ?? req.params.ownerId ?? req.body.ownerId;
-  //   const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
-  //   const petOwnerDetails: PetOwner = {
-  //     ownerId: +ownerId,
-  //     petId: +petId,
-  //   };
-  //   const petOwner = await petOwnerService.getPetAndOrOwner(petOwnerDetails);
-  //   if (!petOwner.length) {
-  //     error.message = 'Pet or owner not found.';
-  //     next(error);
-  //   }
-  //   next();
-  // } catch (err) {
-  //   res
-  //     .status(500)
-  //     .send({ message: 'Error verifying pet and owner.', error: err });
-  // }
 };
 
 const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {

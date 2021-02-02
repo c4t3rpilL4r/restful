@@ -35,6 +35,7 @@ router.put(
 // DELETE
 router.delete(
   '/pets',
+  requestValidator.checkPersonIfExisting,
   requestValidator.checkPetOwnerIfExisting,
   petController.deleteByOwnerId,
 );
@@ -42,6 +43,7 @@ router.delete(
   '/pets/:petId',
   requestValidator.checkPetIfExisting,
   requestValidator.checkPersonIfExisting,
+  requestValidator.checkPetOwnerIfExisting,
   petController.deleteById,
 );
 

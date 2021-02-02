@@ -2,11 +2,11 @@ import { Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (person: Person) => {
-  return await knex<Person>('person').insert(person).returning('*');
+  return await knex('person').insert(person).returning('*');
 };
 
 const getAll = async (page?: number, limit?: number) => {
-  const query = knex<Person>('person');
+  const query = knex('person');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
@@ -16,7 +16,7 @@ const getAll = async (page?: number, limit?: number) => {
 };
 
 const getPetOwners = async (page?: number, limit?: number) => {
-  const query = knex<Person>('pet_owner');
+  const query = knex('pet_owner');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
@@ -36,7 +36,7 @@ const getByPetId = async (petId: number) => {
 };
 
 const getById = async (personId: number) => {
-  return await knex<Person>('person').where({ id: personId });
+  return await knex('person').where({ id: personId });
 };
 
 const update = async (person: Person) => {

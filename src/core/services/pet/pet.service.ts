@@ -17,13 +17,8 @@ const getAllIncludingOwnerId = async (page?: number, limit?: number) => {
   return await petRepository.getAllIncludingOwnerId(page, limit);
 };
 
-const getByOwnerId = async (
-  ownerId: number,
-  includeOwnerId?: boolean,
-  page?: number,
-  limit?: number,
-) => {
-  return await petRepository.getByOwnerId(ownerId, includeOwnerId, page, limit);
+const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
+  return await petRepository.getByOwnerId(ownerId, page, limit);
 };
 
 const getById = async (petId: number) => {
@@ -38,12 +33,8 @@ const deleteById = async (petId: number) => {
   return await petRepository.deleteById(petId);
 };
 
-const deleteByOwnerId = async (ownerId: number) => {
-  return await petRepository.deleteByOwnerId(ownerId);
-};
-
-const deletePetAndOwner = async (petId: number, ownerId: number) => {
-  return await petRepository.deletePetAndOwner(petId, ownerId);
+const deleteOwnership = async (ownerId: number, petId?: number) => {
+  return await petRepository.deleteOwnership(ownerId, petId);
 };
 
 export const petService = {
@@ -55,6 +46,5 @@ export const petService = {
   getById,
   update,
   deleteById,
-  deleteByOwnerId,
-  deletePetAndOwner,
+  deleteOwnership,
 };
