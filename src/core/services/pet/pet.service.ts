@@ -14,10 +14,6 @@ const getAll = async (page?: number, limit?: number) => {
   return await petRepository.getAll(page, limit);
 };
 
-const getAllIncludingOwnerId = async (page?: number, limit?: number) => {
-  return await petRepository.getAllIncludingOwnerId(page, limit);
-};
-
 const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
   return await petRepository.getByOwnerId(ownerId, page, limit);
 };
@@ -42,7 +38,6 @@ export const petService = {
   create,
   addOwnerToPet,
   getAll,
-  getAllIncludingOwnerId,
   getByOwnerId,
   getById,
   update,

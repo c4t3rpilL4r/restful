@@ -18,7 +18,7 @@ const checkPersonIfExisting: RequestHandler = async (req, res, next) => {
       req.body.ownerId;
     const person = await personService.getById(+personId);
 
-    if (!person.length) {
+    if (!person) {
       error.message = 'Person not found.';
 
       next(error);
@@ -58,12 +58,12 @@ const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
       next(error);
     }
 
-    const found = pets.find((ownerPet: Pet) => {
-      if (!ownerPet.id) {
+    const found = pets.find((pet) => {
+      if (!pet.id) {
         return;
       }
 
-      return +ownerPet.id === +petId;
+      return pet.id === +petId;
     });
 
     if (!found) {
@@ -84,7 +84,7 @@ const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {
     const animalId = +req.params.animalId;
     const animal = await animalService.getById(animalId);
 
-    if (!animal.length) {
+    if (!animal) {
       error.message = 'Animal not found.';
       next(error);
     }
@@ -100,7 +100,7 @@ const checkAnimalTypeIfExisting: RequestHandler = async (req, res, next) => {
     const { type } = req.body;
     const animal = await animalService.getByType(type);
 
-    if (animal.length) {
+    if (animal) {
       error.code = 409;
       error.message = 'Animal type already existing in db.';
       next(error);

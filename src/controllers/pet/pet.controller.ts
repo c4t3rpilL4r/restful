@@ -1,14 +1,14 @@
 import { RequestHandler } from 'express';
-import { Pet, PersonPet } from 'src/db_pg/models';
+import { Pet, PersonPet, Animal } from '@app/models';
 import { animalService, petService } from '@app/services';
 import { IAnimal, IPet } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
     const { ownerId, name, animalType } = req.body;
-    let animal = await animalService.getByType(animalType);
+    let animal: Animal = await animalService.getByType(animalType);
 
-    if (!animal.length) {
+    if (!animal) {
       const newAnimalDetails: IAnimal = {
         type: animalType,
       };
@@ -18,7 +18,7 @@ const create: RequestHandler = async (req, res) => {
 
     const newPetDetails: IPet = {
       name,
-      animalId: animal[0].id,
+      animalId: animal.id,
     };
 
     const newPet = await petService.create(newPetDetails);
@@ -56,13 +56,11 @@ const addOwnerToPet: RequestHandler = async (req, res) => {
 
 const getAll: RequestHandler = async (req, res) => {
   try {
-    const { page, limit, includeOwnerId, ownerId } = req.query as any;
+    const { page, limit, ownerId } = req.query as any;
     let pets: Pet[];
 
     if (ownerId) {
       pets = await petService.getByOwnerId(ownerId, page, limit);
-    } else if (includeOwnerId) {
-      pets = await petService.getAllIncludingOwnerId(page, limit);
     } else {
       pets = await petService.getAll(page, limit);
     }

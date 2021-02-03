@@ -1,9 +1,11 @@
 import { IPerson } from '@app/interfaces';
-import { Person, PersonPet } from 'src/db_pg/models';
+import { Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (person: IPerson) => {
-  return await knex<Person>('person').insert(person).returning('*');
+  const newPerson = await knex<Person>('person').insert(person).returning('*');
+
+  return await knex<Person>('person').where({ id: newPerson[0].id }).first('*');
 };
 
 const getAll = async (page?: number, limit?: number) => {
@@ -17,31 +19,36 @@ const getAll = async (page?: number, limit?: number) => {
 };
 
 const getPetOwners = async (page?: number, limit?: number) => {
-  const query = knex<PersonPet>('person_pet');
+  const query = knex<Person>('person');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return await query
-    .distinct('ownerId')
-    .join('person', { ownerId: 'person.id' })
-    .select('person.firstName', 'person.lastName');
+  const ownerIDs = await knex('person_pet').select('ownerId');
+  const listOfOwnerIDs = ownerIDs.map((x) => x.ownerId);
+
+  return await query.whereIn('id', listOfOwnerIDs);
+
+  // return await query.whereIn(
+  //   'id',
+  //   await knex('person_pet').select(knex.ref('ownerId').as('id')),
+  // );
 };
 
 const getByPetId = async (petId: number) => {
-  return await knex('person_pet')
-    .where({ petId })
-    .join('person', { ownerId: 'person.id' })
-    .select('person.id', 'person.firstName', 'person.lastName');
+  const ownerIDs = await knex('person_pet').where({ petId }).select('ownerId');
+  const listOfOwnerIDs = ownerIDs.map((x) => x.ownerId);
+
+  return await knex<Person>('person').whereIn('id', listOfOwnerIDs);
 };
 
 const getById = async (personId: number) => {
-  return await knex('person').where({ id: personId });
+  return await knex<Person>('person').where({ id: personId }).first('*');
 };
 
 const update = async (person: Person) => {
-  return await knex('person')
+  return await knex<Person>('person')
     .where({ id: person.id })
     .update(person)
     .returning('*');

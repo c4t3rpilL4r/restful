@@ -7,55 +7,32 @@ const create = async (pet: IPet) => {
 };
 
 const addOwnerToPet = async (personPet: PersonPet) => {
-  const newPetOwner = await knex('person_pet').insert(personPet).returning('*');
-
-  return await knex('person_pet')
-    .where({
-      ownerId: newPetOwner[0].ownerId,
-      petId: newPetOwner[0].petId,
-    })
-    .select('ownerId')
-    .join('pet', { petId: 'pet.id' })
-    .select('pet.id', 'pet.name')
-    .join('animal', { animalId: 'animal.id' })
-    .select('animal.type');
+  return await knex<PersonPet>('person_pet').insert(personPet).returning('*');
 };
 
 const getAll = async (page?: number, limit?: number) => {
-  const query = knex('pet');
+  const query = knex<Pet>('pet');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return await query
-    .join('animal', { animalId: 'animal.id' })
-    .select('pet.id', 'pet.name', 'animal.type');
-};
-
-const getAllIncludingOwnerId = async (page?: number, limit?: number) => {
-  const query = knex('person_pet');
-
-  if (page && limit) {
-    query.offset((page - 1) * limit).limit(limit);
-  }
-
-  return await query
-    .select('ownerId')
-    .join('pet', { petId: 'pet.id' })
-    .select('pet.id', 'pet.name')
-    .join('animal', { animalId: 'animal.id' })
-    .select('animal.type');
+  return await query.select('*');
 };
 
 const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
-  const query = knex<PersonPet>('person_pet');
+  const query = knex<Pet>('pet');
 
   if (page && limit) {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return await query.where({ ownerId }).select('petId');
+  const petIDs = await knex('person_pet')
+    .where({ ownerId })
+    .select(knex.ref('petId').as('id'));
+  const listOfPetIDs = petIDs.map((x) => x.id);
+
+  return await query.whereIn('id', listOfPetIDs);
 };
 
 const getById = async (petId: number) => {
@@ -63,17 +40,10 @@ const getById = async (petId: number) => {
 };
 
 const update = async (pet: Pet) => {
-  const query = knex<Pet>('pet');
-
-  const updatedPet = await query
+  return await knex<Pet>('pet')
     .where({ id: pet.id })
     .update(pet)
     .returning('*');
-
-  return await query
-    .where({ id: updatedPet[0].id })
-    .join('animal', { animalId: 'animal.id' })
-    .select('pet.id', 'pet.name', 'animal.type');
 };
 
 const deleteById = async (petId: number) => {
@@ -97,7 +67,6 @@ export const petRepository = {
   create,
   addOwnerToPet,
   getAll,
-  getAllIncludingOwnerId,
   getByOwnerId,
   getById,
   update,

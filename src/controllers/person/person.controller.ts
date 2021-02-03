@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { Person } from 'src/db_pg/models';
+import { Person } from '@app/models';
 import { personService } from '@app/services';
 
 const create: RequestHandler = async (req, res) => {
@@ -19,7 +19,7 @@ const create: RequestHandler = async (req, res) => {
 const getAll: RequestHandler = async (req, res) => {
   try {
     const { page, limit, petOwnersOnly, petId } = req.query as any;
-    let persons: Person[];
+    let persons: Person[] = [];
 
     if (petId) {
       persons = await personService.getByPetId(petId);
