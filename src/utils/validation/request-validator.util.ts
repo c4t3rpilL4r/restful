@@ -1,5 +1,4 @@
 import { IError } from '@app/interfaces';
-import { PersonPet, Pet } from 'src/db_pg/models';
 import { personService, petService, animalService } from '@app/services';
 import { RequestHandler } from 'express';
 
@@ -81,8 +80,9 @@ const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
 
 const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {
   try {
-    const animalId = +req.params.animalId;
-    const animal = await animalService.getById(animalId);
+    const animalId =
+      req.params.animalId ?? req.query.animalId ?? req.body.animalId;
+    const animal = await animalService.getById(+animalId);
 
     if (!animal) {
       error.message = 'Animal not found.';

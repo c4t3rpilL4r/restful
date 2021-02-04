@@ -1,36 +1,25 @@
 import { RequestHandler } from 'express';
-import { Pet, PersonPet, Animal } from '@app/models';
-import { animalService, petService } from '@app/services';
-import { IAnimal, IPet } from '@app/interfaces';
+import { Pet, PersonPet } from '@app/models';
+import { petService } from '@app/services';
+import { IPet } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
-    const { ownerId, name, animalType } = req.body;
-    let animal: Animal = await animalService.getByType(animalType);
-
-    if (!animal) {
-      const newAnimalDetails: IAnimal = {
-        type: animalType,
-      };
-
-      animal = await animalService.create(newAnimalDetails);
-    }
+    const { ownerId, name, animalId } = req.body;
 
     const newPetDetails: IPet = {
       name,
-      animalId: animal.id,
+      animalId,
     };
+    const createdPet = await petService.create(newPetDetails);
 
-    const newPet = await petService.create(newPetDetails);
-
-    const newPersonPetDetails: PersonPet = {
+    const newPetOwner: PersonPet = {
       ownerId,
-      petId: newPet.id,
+      petId: createdPet.id,
     };
+    await petService.addOwnerToPet(newPetOwner);
 
-    await petService.addOwnerToPet(newPersonPetDetails);
-
-    res.status(200).send(newPet);
+    res.status(200).send(createdPet);
   } catch (err) {
     res.status(500).send({ message: 'Error creating pet data.', error: err });
   }
@@ -45,10 +34,9 @@ const addOwnerToPet: RequestHandler = async (req, res) => {
       ownerId,
       petId,
     };
+    const addedPetOwner = await petService.addOwnerToPet(newPetOwner);
 
-    const petOwner = await petService.addOwnerToPet(newPetOwner);
-
-    res.status(200).send(petOwner);
+    res.status(200).send(addedPetOwner);
   } catch (err) {
     res.status(500).send({ message: 'Error adding owner to pet.', error: err });
   }
@@ -85,14 +73,14 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-    const updatedPetDetails: Pet = {
+
+    const petNewDetails: Pet = {
       id: petId,
       ...req.body,
     };
+    const updatedPetDetails = await petService.update(petNewDetails);
 
-    const updatedPet = await petService.update(updatedPetDetails);
-
-    res.status(200).send(updatedPet);
+    res.status(200).send(updatedPetDetails);
   } catch (err) {
     res.status(500).send({
       message: 'Error updating pet data.',
@@ -105,14 +93,19 @@ const deleteById: RequestHandler = async (req, res) => {
   try {
     const { ownerId } = req.query as any;
     const petId = +req.params.petId;
+    let isDeleted: boolean;
 
     if (ownerId) {
-      await petService.deleteOwnership(+ownerId, petId);
+      isDeleted = await petService.deleteOwnership(+ownerId, petId);
+    } else {
+      isDeleted = await petService.deleteById(petId);
     }
 
-    await petService.deleteById(petId);
+    const message = isDeleted
+      ? 'Pets deletion successful.'
+      : 'Pets deletion failed.';
 
-    res.status(200).send({ message: 'Pet deletion successful.' });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting pet data.',
@@ -124,10 +117,12 @@ const deleteById: RequestHandler = async (req, res) => {
 const deleteOwnership: RequestHandler = async (req, res) => {
   try {
     const { ownerId } = req.query as any;
+    const isDeleted = await petService.deleteOwnership(+ownerId);
+    const message = isDeleted
+      ? 'Pets deletion successful.'
+      : 'Pets deletion failed.';
 
-    await petService.deleteOwnership(+ownerId);
-
-    res.status(200).send({ message: 'Pets deletion successful.' });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting pet data.',

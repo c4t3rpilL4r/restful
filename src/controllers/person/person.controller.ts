@@ -5,9 +5,9 @@ import { personService } from '@app/services';
 const create: RequestHandler = async (req, res) => {
   try {
     const person: Person = { ...req.body };
-    const newPerson = await personService.create(person);
+    const createdPerson = await personService.create(person);
 
-    res.status(200).send(newPerson);
+    res.status(200).send(createdPerson);
   } catch (err) {
     res.status(500).send({
       message: 'Error creating person data.',
@@ -55,14 +55,14 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const updatedPersonDetails: Person = {
+
+    const personNewDetails: Person = {
       id: personId,
       ...req.body,
     };
+    const updatedPersonDetails = await personService.update(personNewDetails);
 
-    const updatedPerson = await personService.update(updatedPersonDetails);
-
-    res.status(200).send(updatedPerson);
+    res.status(200).send(updatedPersonDetails);
   } catch (err) {
     res.status(500).send({
       message: 'Error updating person data.',
@@ -74,10 +74,12 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
+    const isDeleted = await personService.deleteById(personId);
+    const message = isDeleted
+      ? 'Person deletion successful.'
+      : 'Person deletion failed.';
 
-    await personService.deleteById(personId);
-
-    res.status(200).send({ message: 'Person deletion successful.' });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting person data.',
