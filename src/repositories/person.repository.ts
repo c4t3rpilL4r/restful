@@ -15,7 +15,7 @@ const getAll = async (page?: number, limit?: number) => {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return await query.select('*');
+  return await query.orderBy('id');
 };
 
 const getPetOwners = async (page?: number, limit?: number) => {
@@ -25,10 +25,10 @@ const getPetOwners = async (page?: number, limit?: number) => {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  const ownerIDs = await knex('person_pet').select('ownerId');
+  const ownerIDs = await knex('person_pet').distinct('ownerId');
   const listOfOwnerIDs = ownerIDs.map((x) => x.ownerId);
 
-  return await query.whereIn('id', listOfOwnerIDs);
+  return await query.whereIn('id', listOfOwnerIDs).orderBy('id');
 
   // return await query.whereIn(
   //   'id',
@@ -48,15 +48,21 @@ const getById = async (personId: number) => {
 };
 
 const update = async (person: Person) => {
-  return await knex<Person>('person')
+  const updatedPerson = await knex<Person>('person')
     .where({ id: person.id })
     .update(person)
     .returning('*');
+
+  return await knex<Person>('person')
+    .where({ id: updatedPerson[0].id })
+    .first('*');
 };
 
 const deleteById = async (personId: number) => {
   await knex('person_pet').where({ ownerId: personId }).del();
-  return await knex('person').where({ id: personId }).del();
+  const isDeleted = await knex('person').where({ id: personId }).del();
+
+  return !!isDeleted;
 };
 
 export const personRepository = {

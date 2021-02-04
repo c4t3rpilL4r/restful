@@ -25,12 +25,12 @@ const create: RequestHandler = async (req, res) => {
 
     const newPersonPetDetails: PersonPet = {
       ownerId,
-      petId: newPet[0].id,
+      petId: newPet.id,
     };
 
-    const newPersonPet = await petService.addOwnerToPet(newPersonPetDetails);
+    await petService.addOwnerToPet(newPersonPetDetails);
 
-    res.status(200).send(newPersonPet);
+    res.status(200).send(newPet);
   } catch (err) {
     res.status(500).send({ message: 'Error creating pet data.', error: err });
   }

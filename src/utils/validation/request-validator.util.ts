@@ -35,7 +35,7 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
     const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
     const pet = await petService.getById(+petId);
 
-    if (!pet.length) {
+    if (!pet) {
       error.message = 'Pet not found.';
       next(error);
     }

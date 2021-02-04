@@ -17,7 +17,7 @@ const getAll = async (page: number, limit: number) => {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  return await query.select();
+  return await query.select('*');
 };
 
 const getById = async (animalId: number) => {
@@ -29,14 +29,20 @@ const getByType = async (animalType: string) => {
 };
 
 const update = async (animal: Animal) => {
-  return await knex<Animal>('animal')
+  const updatedAnimal = await knex<Animal>('animal')
     .where({ id: animal.id })
     .update(animal)
     .returning('*');
+
+  return await knex<Animal>('animal')
+    .where({ id: updatedAnimal[0].id })
+    .first('*');
 };
 
 const deleteById = async (animalId: number) => {
-  return await knex('animal').where({ id: animalId }).del();
+  const isDeleted = await knex('animal').where({ id: animalId }).del();
+
+  return !!isDeleted;
 };
 
 export const animalRepository = {
