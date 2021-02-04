@@ -8,6 +8,7 @@ const router = express.Router();
 router.post(
   '/pets',
   requestValidator.checkPersonIfExisting,
+  requestValidator.checkAnimalIfExisting,
   petController.create,
 );
 router.post(

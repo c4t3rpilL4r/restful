@@ -5,9 +5,9 @@ import { animalService } from '@app/services';
 const create: RequestHandler = async (req, res) => {
   try {
     const newAnimalDetails: Animal = { ...req.body };
-    const newAnimal = await animalService.create(newAnimalDetails);
+    const createdAnimal = await animalService.create(newAnimalDetails);
 
-    res.status(200).send(newAnimal);
+    res.status(200).send(createdAnimal);
   } catch (err) {
     res.status(500).send({
       message: 'Error creating animal data.',
@@ -47,12 +47,12 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
-    const updatedAnimalDetails: Animal = {
+    const animalNewDetails: Animal = {
       id: animalId,
       ...req.body,
     };
 
-    const updatedAnimal = await animalService.update(updatedAnimalDetails);
+    const updatedAnimal = await animalService.update(animalNewDetails);
 
     res.status(200).send(updatedAnimal);
   } catch (err) {
@@ -66,10 +66,12 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
+    const isDeleted = await animalService.deleteById(animalId);
+    const message = isDeleted
+      ? 'Animal deletion successful.'
+      : 'Animal deletion failed.';
 
-    await animalService.deleteById(animalId);
-
-    res.status(200).send({ message: 'Animal deletion successful.' });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting animal data.',

@@ -3,11 +3,11 @@ import { Animal } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (animal: IAnimal) => {
-  const newAnimalId = await knex<Animal>('animal')
+  const [createdAnimal] = await knex<Animal>('animal')
     .insert(animal)
-    .returning('id');
+    .returning('*');
 
-  return await knex<Animal>('animal').where({ id: newAnimalId[0] }).first('*');
+  return createdAnimal;
 };
 
 const getAll = async (page: number, limit: number) => {
@@ -21,26 +21,32 @@ const getAll = async (page: number, limit: number) => {
 };
 
 const getById = async (animalId: number) => {
-  return await knex<Animal>('animal').where({ id: animalId }).first('*');
+  const animal = await knex<Animal>('animal')
+    .where({ id: animalId })
+    .first('*');
+
+  return animal;
 };
 
 const getByType = async (animalType: string) => {
-  return await knex<Animal>('animal').where({ type: animalType }).first('*');
+  const animal = await knex<Animal>('animal')
+    .where({ type: animalType })
+    .first('*');
+
+  return animal;
 };
 
 const update = async (animal: Animal) => {
-  const updatedAnimal = await knex<Animal>('animal')
+  const [updatedAnimal] = await knex<Animal>('animal')
     .where({ id: animal.id })
     .update(animal)
     .returning('*');
 
-  return await knex<Animal>('animal')
-    .where({ id: updatedAnimal[0].id })
-    .first('*');
+  return updatedAnimal;
 };
 
 const deleteById = async (animalId: number) => {
-  const isDeleted = await knex('animal').where({ id: animalId }).del();
+  const isDeleted = await knex<Animal>('animal').where({ id: animalId }).del();
 
   return !!isDeleted;
 };

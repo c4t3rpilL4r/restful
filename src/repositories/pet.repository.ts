@@ -3,13 +3,17 @@ import { Pet, PersonPet } from 'src/db_pg/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (pet: IPet) => {
-  const newPet = await knex<Pet>('pet').insert(pet).returning('*');
+  const [createdPet] = await knex<Pet>('pet').insert(pet).returning('*');
 
-  return await knex<Pet>('pet').where({ id: newPet[0].id }).first('*');
+  return createdPet;
 };
 
 const addOwnerToPet = async (personPet: PersonPet) => {
-  return await knex<PersonPet>('person_pet').insert(personPet).returning('*');
+  const [createdPetOwner] = await knex<PersonPet>('person_pet')
+    .insert(personPet)
+    .returning('*');
+
+  return createdPetOwner;
 };
 
 const getAll = async (page?: number, limit?: number) => {
@@ -29,34 +33,40 @@ const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
     query.offset((page - 1) * limit).limit(limit);
   }
 
-  const petIDs = await knex('person_pet').where({ ownerId }).select('petId');
+  const petIDs = await knex<PersonPet>('person_pet')
+    .where({ ownerId })
+    .select('petId');
   const listOfPetIDs = petIDs.map((x) => x.petId);
 
   return await query.whereIn('id', listOfPetIDs).orderBy('id');
 };
 
 const getById = async (petId: number) => {
-  return await knex<Pet>('pet').where({ id: petId }).first('*');
+  const pet = await knex<Pet>('pet').where({ id: petId }).first('*');
+
+  return pet;
 };
 
 const update = async (pet: Pet) => {
-  const updatedPet = await knex<Pet>('pet')
+  const [updatedPet] = await knex<Pet>('pet')
     .where({ id: pet.id })
     .update(pet)
     .returning('*');
 
-  return await knex<Pet>('pet').where({ id: updatedPet[0].id }).first('*');
+  return updatedPet;
+
+  // return await knex<Pet>('pet').where({ updatedPet[0] }).first('*');
 };
 
 const deleteById = async (petId: number) => {
-  await knex('person_pet').where({ petId }).del();
-  const isDeleted = await knex('pet').where({ id: petId }).del();
+  await knex<PersonPet>('person_pet').where({ petId }).del();
+  const isDeleted = await knex<Pet>('pet').where({ id: petId }).del();
 
   return !!isDeleted;
 };
 
 const deleteOwnership = async (ownerId: number, petId?: number) => {
-  const query = knex('person_pet');
+  const query = knex<PersonPet>('person_pet');
   let isDeleted: boolean;
 
   if (petId) {
