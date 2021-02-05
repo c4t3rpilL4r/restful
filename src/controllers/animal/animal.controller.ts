@@ -16,10 +16,10 @@ const create: RequestHandler = async (req, res) => {
   }
 };
 
-const getAll: RequestHandler = async (req: Request, res) => {
+const getPaginated: RequestHandler = async (req: Request, res) => {
   try {
     const { page, limit } = req.query as any;
-    const animals = await animalService.getAll(+page, +limit);
+    const animals = await animalService.getPaginated(+page, +limit);
 
     res.status(200).send(animals);
   } catch (err) {
@@ -51,7 +51,6 @@ const update: RequestHandler = async (req, res) => {
       id: animalId,
       ...req.body,
     };
-
     const updatedAnimal = await animalService.update(animalNewDetails);
 
     res.status(200).send(updatedAnimal);
@@ -82,7 +81,7 @@ const deleteById: RequestHandler = async (req, res) => {
 
 export const animalController = {
   create,
-  getAll,
+  getPaginated,
   getById,
   update,
   deleteById,

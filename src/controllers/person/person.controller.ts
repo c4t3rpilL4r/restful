@@ -16,18 +16,10 @@ const create: RequestHandler = async (req, res) => {
   }
 };
 
-const getAll: RequestHandler = async (req, res) => {
+const getPaginated: RequestHandler = async (req, res) => {
   try {
-    const { page, limit, petOwnersOnly, petId } = req.query as any;
-    let persons: Person[] = [];
-
-    if (petId) {
-      persons = await personService.getByPetId(petId);
-    } else if (petOwnersOnly) {
-      persons = await personService.getPetOwners(page, limit);
-    } else {
-      persons = await personService.getAll(page, limit);
-    }
+    const { page, limit } = req.query as any;
+    const persons = await personService.getPaginated(page, limit);
 
     res.status(200).send(persons);
   } catch (err) {
@@ -55,7 +47,6 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-
     const personNewDetails: Person = {
       id: personId,
       ...req.body,
@@ -90,7 +81,7 @@ const deleteById: RequestHandler = async (req, res) => {
 
 export const personController = {
   create,
-  getAll,
+  getPaginated,
   getById,
   update,
   deleteById,

@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/persons', personController.create);
 
 // READ
-router.get('/persons', personController.getAll);
+router.get('/persons', personController.getPaginated);
 router.get(
   '/persons/:personId',
   requestValidator.checkPersonIfExisting,

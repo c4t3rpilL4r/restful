@@ -6,16 +6,12 @@ const create = async (animal: IAnimal) => {
   return await animalRepository.create(animal);
 };
 
-const getAll = async (page: number, limit: number) => {
-  return await animalRepository.getAll(page, limit);
+const getPaginated = async (page: number, limit: number) => {
+  return await animalRepository.getPaginated(page, limit);
 };
 
 const getById = async (animalId: number) => {
   return await animalRepository.getById(animalId);
-};
-
-const getByType = async (animalType: string) => {
-  return await animalRepository.getByType(animalType);
 };
 
 const update = async (animal: Animal) => {
@@ -28,9 +24,8 @@ const deleteById = async (animalId: number) => {
 
 export const animalService = {
   create,
-  getAll,
+  getPaginated,
   getById,
-  getByType,
   update,
   deleteById,
 };

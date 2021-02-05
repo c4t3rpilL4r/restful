@@ -8,18 +8,11 @@ const router = express.Router();
 router.post(
   '/pets',
   requestValidator.checkPersonIfExisting,
-  requestValidator.checkAnimalIfExisting,
   petController.create,
-);
-router.post(
-  '/pets/:petId',
-  requestValidator.checkPersonIfExisting,
-  requestValidator.checkPetIfExisting,
-  petController.addOwnerToPet,
 );
 
 // READ
-router.get('/pets', petController.getAll);
+router.get('/pets', petController.getPaginated);
 router.get(
   '/pets/:petId',
   requestValidator.checkPetIfExisting,
@@ -35,16 +28,8 @@ router.put(
 
 // DELETE
 router.delete(
-  '/pets',
-  requestValidator.checkPersonIfExisting,
-  requestValidator.checkPetOwnerIfExisting,
-  petController.deleteByOwnerId,
-);
-router.delete(
   '/pets/:petId',
   requestValidator.checkPetIfExisting,
-  requestValidator.checkPersonIfExisting,
-  requestValidator.checkPetOwnerIfExisting,
   petController.deleteById,
 );
 
