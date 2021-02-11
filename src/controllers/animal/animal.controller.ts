@@ -7,7 +7,7 @@ const create: RequestHandler = async (req, res) => {
     const newAnimalDetails: Animal = { ...req.body };
     const createdAnimal = await animalService.create(newAnimalDetails);
 
-    res.status(200).send(createdAnimal);
+    res.status(201).send(createdAnimal);
   } catch (err) {
     res.status(500).send({
       message: 'Error creating animal data.',
@@ -70,7 +70,7 @@ const deleteById: RequestHandler = async (req, res) => {
       ? 'Animal deletion successful.'
       : 'Animal deletion failed.';
 
-    res.status(200).send({ message });
+    res.status(204).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting animal data.',

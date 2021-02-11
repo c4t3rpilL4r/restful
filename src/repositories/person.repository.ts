@@ -1,21 +1,28 @@
-import { IPerson } from '@app/interfaces';
+import { IPetOwnership, IPerson } from '@app/interfaces';
 import { Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (person: IPerson) => {
-  const [newPerson] = await knex<Person>('persons')
+  const [createdPerson] = await knex<Person>('persons')
     .insert(person)
     .returning('*');
 
-  return newPerson;
+  return createdPerson;
+};
+
+const doPetOwnership = async (personPet: IPetOwnership) => {
+  const [petOwnership] = await knex('persons_pets')
+    .insert(personPet)
+    .returning('*');
+
+  return !!petOwnership;
 };
 
 const getPaginated = async (page: number, limit: number) => {
   const result = await knex<Person>('persons')
     .select('*')
     .offset((page - 1) * limit)
-    .limit(limit)
-    .orderBy('id');
+    .limit(limit);
 
   return result;
 };
@@ -45,6 +52,7 @@ const deleteById = async (personId: number) => {
 
 export const personRepository = {
   create,
+  doPetOwnership,
   getPaginated,
   getById,
   update,

@@ -16,8 +16,7 @@ const getPaginated = async (page: number, limit: number) => {
   const result = await knex<Pet>('pets')
     .select('*')
     .offset((page - 1) * limit)
-    .limit(limit)
-    .orderBy('id');
+    .limit(limit);
 
   return result;
 };

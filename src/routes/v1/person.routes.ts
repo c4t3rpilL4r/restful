@@ -6,6 +6,12 @@ const router = express.Router();
 
 // CREATE
 router.post('/persons', personController.create);
+router.post(
+  '/persons/:personId/pets',
+  requestValidator.checkPersonIfExisting,
+  requestValidator.checkPetIfExisting,
+  personController.acquirePet,
+);
 
 // READ
 router.get('/persons', personController.getPaginated);

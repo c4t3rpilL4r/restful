@@ -12,7 +12,7 @@ const create: RequestHandler = async (req, res) => {
     };
     const createdPet = await petService.create(newPetDetails, ownerId);
 
-    res.status(200).send(createdPet);
+    res.status(201).send(createdPet);
   } catch (err) {
     res.status(500).send({ message: 'Error creating pet data.', error: err });
   }
@@ -67,7 +67,7 @@ const deleteById: RequestHandler = async (req, res) => {
       ? 'Pets deletion successful.'
       : 'Pets deletion failed.';
 
-    res.status(200).send({ message });
+    res.status(204).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting pet data.',

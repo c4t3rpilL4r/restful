@@ -1,8 +1,13 @@
-import { Person } from 'src/db_pg/models';
 import { personRepository } from '@app/repositories';
+import { IPerson, IPetOwnership } from '@app/interfaces';
+import { Person } from '@app/models';
 
-const create = async (person: Person) => {
+const create = async (person: IPerson) => {
   return await personRepository.create(person);
+};
+
+const doPetOwnership = async (personPet: IPetOwnership) => {
+  return await personRepository.doPetOwnership(personPet);
 };
 
 const getPaginated = async (page: number, limit: number) => {
@@ -22,9 +27,10 @@ const deleteById = async (personId: number) => {
 };
 
 export const personService = {
+  create,
+  doPetOwnership,
   getPaginated,
   getById,
-  create,
   update,
   deleteById,
 };

@@ -1,18 +1,43 @@
 import { RequestHandler } from 'express';
 import { Person } from '@app/models';
 import { personService } from '@app/services';
+import { IPetOwnership } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
     const person: Person = { ...req.body };
     const createdPerson = await personService.create(person);
 
-    res.status(200).send(createdPerson);
+    res.status(201).send(createdPerson);
   } catch (err) {
     res.status(500).send({
       message: 'Error creating person data.',
       error: err,
     });
+  }
+};
+
+const acquirePet: RequestHandler = async (req, res) => {
+  try {
+    const ownerId = +req.params.personId;
+    const petId = +req.body.petId;
+    const petOwnershipDetails: IPetOwnership = {
+      ownerId,
+      petId,
+    };
+
+    const addedPetOwnership = await personService.doPetOwnership(
+      petOwnershipDetails,
+    );
+    const message = addedPetOwnership
+      ? 'Pet ownership successful.'
+      : 'Pet ownership failed.';
+
+    res.status(201).send({ message });
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: 'Error adding pet ownership.', error: err });
   }
 };
 
@@ -65,12 +90,9 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const isDeleted = await personService.deleteById(personId);
-    const message = isDeleted
-      ? 'Person deletion successful.'
-      : 'Person deletion failed.';
+    await personService.deleteById(personId);
 
-    res.status(200).send({ message });
+    res.send(204);
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting person data.',
@@ -81,6 +103,7 @@ const deleteById: RequestHandler = async (req, res) => {
 
 export const personController = {
   create,
+  acquirePet,
   getPaginated,
   getById,
   update,
