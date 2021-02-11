@@ -62,9 +62,13 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const petId = +req.params.petId;
-    await petService.deleteById(petId);
+    const deletedPet = await petService.deleteById(petId);
 
-    res.status(204).send({ message: 'Pet deletion successful.' });
+    const message = deletedPet
+      ? 'Pet deletion successful.'
+      : 'Pet deletion failed.';
+
+    res.status(204).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting pet data.',

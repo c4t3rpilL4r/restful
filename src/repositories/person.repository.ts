@@ -1,4 +1,4 @@
-import { IPetOwnership, IPerson } from '@app/interfaces';
+import { IPersonPet, IPerson } from '@app/interfaces';
 import { Person } from '@app/models';
 import knex from '../db_pg/knex-config';
 
@@ -10,8 +10,12 @@ const create = async (person: IPerson) => {
   return createdPerson;
 };
 
-const doPetOwnership = async (petOwnership: IPetOwnership) => {
-  await knex('persons_pets').insert(petOwnership).returning('*');
+const setPersonPet = async (personPet: IPersonPet) => {
+  const _personPet = await knex('persons_pets')
+    .insert(personPet)
+    .returning('*');
+
+  return !!_personPet;
 };
 
 const getPaginated = async (page: number, limit: number) => {
@@ -41,12 +45,16 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  await knex<Person>('persons').where({ id: personId }).del();
+  const deletedPet = await knex<Person>('persons')
+    .where({ id: personId })
+    .del();
+
+  return !!deletedPet;
 };
 
 export const personRepository = {
   create,
-  doPetOwnership,
+  setPersonPet,
   getPaginated,
   getById,
   update,

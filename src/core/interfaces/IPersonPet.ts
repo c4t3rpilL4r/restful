@@ -1,4 +1,4 @@
-export interface IPetOwnership {
+export interface IPersonPet {
   ownerId: number;
   petId: number;
 }

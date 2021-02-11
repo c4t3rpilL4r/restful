@@ -37,7 +37,9 @@ const update = async (pet: Pet) => {
 };
 
 const deleteById = async (petId: number) => {
-  await knex<Pet>('pets').where({ id: petId }).del();
+  const deletedPet = await knex<Pet>('pets').where({ id: petId }).del();
+
+  return !!deletedPet;
 };
 
 export const petRepository = {

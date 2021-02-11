@@ -1,13 +1,13 @@
 import { personRepository } from '@app/repositories';
-import { IPerson, IPetOwnership } from '@app/interfaces';
+import { IPerson, IPersonPet } from '@app/interfaces';
 import { Person } from '@app/models';
 
 const create = async (person: IPerson) => {
   return await personRepository.create(person);
 };
 
-const doPetOwnership = async (petOwnership: IPetOwnership) => {
-  await personRepository.doPetOwnership(petOwnership);
+const setPersonPet = async (personPet: IPersonPet) => {
+  return await personRepository.setPersonPet(personPet);
 };
 
 const getPaginated = async (page: number, limit: number) => {
@@ -23,12 +23,12 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  await personRepository.deleteById(personId);
+  return await personRepository.deleteById(personId);
 };
 
 export const personService = {
   create,
-  doPetOwnership,
+  setPersonPet,
   getPaginated,
   getById,
   update,

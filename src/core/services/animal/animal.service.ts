@@ -19,7 +19,7 @@ const update = async (animal: Animal) => {
 };
 
 const deleteById = async (animalId: number) => {
-  await animalRepository.deleteById(animalId);
+  return await animalRepository.deleteById(animalId);
 };
 
 export const animalService = {
