@@ -6,8 +6,8 @@ const create = async (person: IPerson) => {
   return await personRepository.create(person);
 };
 
-const doPetOwnership = async (personPet: IPetOwnership) => {
-  return await personRepository.doPetOwnership(personPet);
+const doPetOwnership = async (petOwnership: IPetOwnership) => {
+  await personRepository.doPetOwnership(petOwnership);
 };
 
 const getPaginated = async (page: number, limit: number) => {
@@ -23,7 +23,7 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  return await personRepository.deleteById(personId);
+  await personRepository.deleteById(personId);
 };
 
 export const personService = {

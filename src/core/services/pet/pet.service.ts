@@ -19,7 +19,7 @@ const update = async (pet: Pet) => {
 };
 
 const deleteById = async (petId: number) => {
-  return await petRepository.deleteById(petId);
+  await petRepository.deleteById(petId);
 };
 
 export const petService = {

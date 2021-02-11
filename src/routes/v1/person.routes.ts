@@ -10,7 +10,7 @@ router.post(
   '/persons/:personId/pets',
   requestValidator.checkPersonIfExisting,
   requestValidator.checkPetIfExisting,
-  personController.acquirePet,
+  personController.doPetOwnership,
 );
 
 // READ

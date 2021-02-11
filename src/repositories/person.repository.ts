@@ -10,12 +10,8 @@ const create = async (person: IPerson) => {
   return createdPerson;
 };
 
-const doPetOwnership = async (personPet: IPetOwnership) => {
-  const [petOwnership] = await knex('persons_pets')
-    .insert(personPet)
-    .returning('*');
-
-  return !!petOwnership;
+const doPetOwnership = async (petOwnership: IPetOwnership) => {
+  await knex('persons_pets').insert(petOwnership).returning('*');
 };
 
 const getPaginated = async (page: number, limit: number) => {
@@ -45,9 +41,7 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  const isDeleted = await knex<Person>('persons').where({ id: personId }).del();
-
-  return !!isDeleted;
+  await knex<Person>('persons').where({ id: personId }).del();
 };
 
 export const personRepository = {
