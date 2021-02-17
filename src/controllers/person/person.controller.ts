@@ -89,9 +89,9 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-    const deletedPerson = await personService.deleteById(personId);
+    const isDeleted = await personService.deleteById(personId);
 
-    const message = deletedPerson
+    const message = isDeleted
       ? 'Person deletion successful.'
       : 'Person deletion failed.';
 

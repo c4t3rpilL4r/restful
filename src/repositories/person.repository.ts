@@ -45,11 +45,11 @@ const update = async (person: Person) => {
 };
 
 const deleteById = async (personId: number) => {
-  const deletedPet = await knex<Person>('persons')
+  const deletedPerson = await knex<Person>('persons')
     .where({ id: personId })
     .del();
 
-  return !!deletedPet;
+  return !!deletedPerson;
 };
 
 export const personRepository = {

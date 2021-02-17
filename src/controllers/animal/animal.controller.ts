@@ -65,9 +65,9 @@ const update: RequestHandler = async (req, res) => {
 const deleteById: RequestHandler = async (req, res) => {
   try {
     const animalId = +req.params.animalId;
-    const deletedAnimal = await animalService.deleteById(animalId);
+    const isDeleted = await animalService.deleteById(animalId);
 
-    const message = deletedAnimal
+    const message = isDeleted
       ? 'Animal deletion successful.'
       : 'Animal deletion failed.';
 
