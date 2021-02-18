@@ -1,13 +1,14 @@
 import { RequestHandler } from 'express';
 import { Person } from '@app/models';
 import { personService } from '@app/services';
+import { IPersonPet } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
     const person: Person = { ...req.body };
     const createdPerson = await personService.create(person);
 
-    res.status(200).send(createdPerson);
+    res.status(201).send(createdPerson);
   } catch (err) {
     res.status(500).send({
       message: 'Error creating person data.',
@@ -16,18 +17,28 @@ const create: RequestHandler = async (req, res) => {
   }
 };
 
-const getAll: RequestHandler = async (req, res) => {
+const setPersonPet: RequestHandler = async (req, res) => {
   try {
-    const { page, limit, petOwnersOnly, petId } = req.query as any;
-    let persons: Person[] = [];
+    const { ownerId, petId } = req.params;
 
-    if (petId) {
-      persons = await personService.getByPetId(petId);
-    } else if (petOwnersOnly) {
-      persons = await personService.getPetOwners(page, limit);
-    } else {
-      persons = await personService.getAll(page, limit);
-    }
+    const personPetDetails: IPersonPet = {
+      ownerId: +ownerId,
+      petId: +petId,
+    };
+    await personService.setPersonPet(personPetDetails);
+
+    res.status(201).send({ message: 'Pet ownership successful.' });
+  } catch (err) {
+    res
+      .status(500)
+      .send({ message: 'Error adding pet ownership.', error: err });
+  }
+};
+
+const getPaginated: RequestHandler = async (req, res) => {
+  try {
+    const { page, limit } = req.query as any;
+    const persons = await personService.getPaginated(page, limit);
 
     res.status(200).send(persons);
   } catch (err) {
@@ -55,7 +66,6 @@ const getById: RequestHandler = async (req, res) => {
 const update: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
-
     const personNewDetails: Person = {
       id: personId,
       ...req.body,
@@ -75,6 +85,7 @@ const deleteById: RequestHandler = async (req, res) => {
   try {
     const personId = +req.params.personId;
     const isDeleted = await personService.deleteById(personId);
+
     const message = isDeleted
       ? 'Person deletion successful.'
       : 'Person deletion failed.';
@@ -90,7 +101,8 @@ const deleteById: RequestHandler = async (req, res) => {
 
 export const personController = {
   create,
-  getAll,
+  setPersonPet,
+  getPaginated,
   getById,
   update,
   deleteById,

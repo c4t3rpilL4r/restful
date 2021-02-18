@@ -1,21 +1,17 @@
-import { Pet, PersonPet } from 'src/db_pg/models';
+import { Pet } from 'src/db_pg/models';
 import { petRepository } from '@app/repositories';
-import { IPet } from '@app/interfaces';
+import { IPet, IPetFilters } from '@app/interfaces';
 
-const create = async (pet: IPet) => {
-  return await petRepository.create(pet);
+const create = async (pet: IPet, ownerId: number) => {
+  return await petRepository.create(pet, ownerId);
 };
 
-const addOwnerToPet = async (petOwner: PersonPet) => {
-  return await petRepository.addOwnerToPet(petOwner);
-};
-
-const getAll = async (page?: number, limit?: number) => {
-  return await petRepository.getAll(page, limit);
-};
-
-const getByOwnerId = async (ownerId: number, page?: number, limit?: number) => {
-  return await petRepository.getByOwnerId(ownerId, page, limit);
+const getPaginated = async (
+  page: number,
+  limit: number,
+  filters?: IPetFilters,
+) => {
+  return await petRepository.getPaginated(page, limit, filters);
 };
 
 const getById = async (petId: number) => {
@@ -30,17 +26,10 @@ const deleteById = async (petId: number) => {
   return await petRepository.deleteById(petId);
 };
 
-const deleteOwnership = async (ownerId: number, petId?: number) => {
-  return await petRepository.deleteOwnership(ownerId, petId);
-};
-
 export const petService = {
   create,
-  addOwnerToPet,
-  getAll,
-  getByOwnerId,
+  getPaginated,
   getById,
   update,
   deleteById,
-  deleteOwnership,
 };

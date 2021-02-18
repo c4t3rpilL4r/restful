@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-const TABLE_NAME = 'person_pet';
+const TABLE_NAME = 'persons_pets';
 
 export async function up(knex: Knex): Promise<void> {
   const tableExists = await knex.schema.hasTable(TABLE_NAME);
@@ -11,8 +11,8 @@ export async function up(knex: Knex): Promise<void> {
         table.integer('ownerId').notNullable();
         table.integer('petId').notNullable();
 
-        table.foreign('ownerId').references('person.id');
-        table.foreign('petId').references('pet.id');
+        table.foreign('ownerId').references('persons.id').onDelete('CASCADE');
+        table.foreign('petId').references('pets.id').onDelete('CASCADE');
       })
       .then(() => {
         // tslint:disable-next-line: no-console

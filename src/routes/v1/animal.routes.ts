@@ -5,14 +5,10 @@ import { animalController } from '@app/controllers';
 const router = express.Router();
 
 // CREATE
-router.post(
-  '/animals',
-  requestValidator.checkAnimalTypeIfExisting,
-  animalController.create,
-);
+router.post('/animals', animalController.create);
 
 // READ
-router.get('/animals', animalController.getAll);
+router.get('/animals', animalController.getPaginated);
 router.get(
   '/animals/:animalId',
   requestValidator.checkAnimalIfExisting,

@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/persons', personController.create);
 
 // READ
-router.get('/persons', personController.getAll);
+router.get('/persons', personController.getPaginated);
 router.get(
   '/persons/:personId',
   requestValidator.checkPersonIfExisting,
@@ -20,6 +20,12 @@ router.put(
   '/persons/:personId',
   requestValidator.checkPersonIfExisting,
   personController.update,
+);
+router.put(
+  '/persons/:ownerId/pets/:petId',
+  requestValidator.checkPersonIfExisting,
+  requestValidator.checkPetIfExisting,
+  personController.setPersonPet,
 );
 
 // DELETE

@@ -45,39 +45,6 @@ const checkPetIfExisting: RequestHandler = async (req, res, next) => {
   }
 };
 
-const checkPetOwnerIfExisting: RequestHandler = async (req, res, next) => {
-  try {
-    const ownerId = req.query.ownerId ?? req.params.ownerId ?? req.body.ownerId;
-    const petId = req.query.petId ?? req.params.petId ?? req.body.petId;
-
-    const pets = await petService.getByOwnerId(+ownerId);
-
-    if (!pets.length) {
-      error.message = 'Person does not own any pet.';
-      next(error);
-    }
-
-    const found = pets.find((pet) => {
-      if (!pet.id) {
-        return;
-      }
-
-      return pet.id === +petId;
-    });
-
-    if (!found) {
-      error.message = 'Pet not owned by person.';
-      next(error);
-    }
-
-    next();
-  } catch (err) {
-    res
-      .status(500)
-      .send({ message: 'Error verifying pet and owner.', error: err });
-  }
-};
-
 const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {
   try {
     const animalId =
@@ -95,29 +62,8 @@ const checkAnimalIfExisting: RequestHandler = async (req, res, next) => {
   }
 };
 
-const checkAnimalTypeIfExisting: RequestHandler = async (req, res, next) => {
-  try {
-    const { type } = req.body;
-    const animal = await animalService.getByType(type);
-
-    if (animal) {
-      error.code = 409;
-      error.message = 'Animal type already existing in db.';
-      next(error);
-    }
-
-    next();
-  } catch (err) {
-    res
-      .status(500)
-      .send({ message: 'Error verifying animal type.', error: err });
-  }
-};
-
 export const requestValidator = {
   checkPersonIfExisting,
   checkPetIfExisting,
-  checkPetOwnerIfExisting,
   checkAnimalIfExisting,
-  checkAnimalTypeIfExisting,
 };

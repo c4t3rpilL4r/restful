@@ -1,20 +1,17 @@
-import { Person } from 'src/db_pg/models';
 import { personRepository } from '@app/repositories';
+import { IPerson, IPersonPet } from '@app/interfaces';
+import { Person } from '@app/models';
 
-const create = async (person: Person) => {
+const create = async (person: IPerson) => {
   return await personRepository.create(person);
 };
 
-const getAll = async (page?: number, limit?: number) => {
-  return await personRepository.getAll(page, limit);
+const setPersonPet = async (personPet: IPersonPet) => {
+  return await personRepository.setPersonPet(personPet);
 };
 
-const getPetOwners = async (page?: number, limit?: number) => {
-  return await personRepository.getPetOwners(page, limit);
-};
-
-const getByPetId = async (petId: number) => {
-  return await personRepository.getByPetId(petId);
+const getPaginated = async (page: number, limit: number) => {
+  return await personRepository.getPaginated(page, limit);
 };
 
 const getById = async (personId: number) => {
@@ -30,11 +27,10 @@ const deleteById = async (personId: number) => {
 };
 
 export const personService = {
-  getAll,
-  getPetOwners,
-  getByPetId,
-  getById,
   create,
+  setPersonPet,
+  getPaginated,
+  getById,
   update,
   deleteById,
 };

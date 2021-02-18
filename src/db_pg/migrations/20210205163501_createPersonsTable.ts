@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-const TABLE_NAME = 'animal';
+const TABLE_NAME = 'persons';
 
 export async function up(knex: Knex): Promise<void> {
   const tableExists = await knex.schema.hasTable(TABLE_NAME);
@@ -9,7 +9,8 @@ export async function up(knex: Knex): Promise<void> {
     await knex.schema
       .createTable(TABLE_NAME, (table) => {
         table.increments('id').primary();
-        table.string('type').unique().notNullable();
+        table.string('firstName').notNullable();
+        table.string('lastName').notNullable();
       })
       .then(() => {
         // tslint:disable-next-line: no-console
