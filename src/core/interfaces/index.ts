@@ -3,3 +3,4 @@ export * from './IError';
 export * from './IPerson';
 export * from './IPersonPet';
 export * from './IPet';
+export * from './IPetFilters';

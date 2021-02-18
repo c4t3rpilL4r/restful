@@ -19,20 +19,15 @@ const create: RequestHandler = async (req, res) => {
 
 const setPersonPet: RequestHandler = async (req, res) => {
   try {
-    const ownerId = +req.params.personId;
-    const petId = +req.body.petId;
+    const { ownerId, petId } = req.params;
 
     const personPetDetails: IPersonPet = {
-      ownerId,
-      petId,
+      ownerId: +ownerId,
+      petId: +petId,
     };
-    const personPet = await personService.setPersonPet(personPetDetails);
+    await personService.setPersonPet(personPetDetails);
 
-    const message = personPet
-      ? 'Pet ownership successful.'
-      : 'Pet ownership failed.';
-
-    res.status(201).send({ message });
+    res.status(201).send({ message: 'Pet ownership successful.' });
   } catch (err) {
     res
       .status(500)
@@ -95,7 +90,7 @@ const deleteById: RequestHandler = async (req, res) => {
       ? 'Person deletion successful.'
       : 'Person deletion failed.';
 
-    res.status(204).send({ message });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting person data.',

@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { Pet } from '@app/models';
 import { petService } from '@app/services';
-import { IPet } from '@app/interfaces';
+import { IPet, IPetFilters } from '@app/interfaces';
 
 const create: RequestHandler = async (req, res) => {
   try {
@@ -20,8 +20,11 @@ const create: RequestHandler = async (req, res) => {
 
 const getPaginated: RequestHandler = async (req, res) => {
   try {
-    const { page, limit } = req.query as any;
-    const pets = await petService.getPaginated(page, limit);
+    const { page, limit, ownerId } = req.query as any;
+    const filters: IPetFilters = {
+      ownerId,
+    };
+    const pets = await petService.getPaginated(page, limit, filters);
 
     res.status(200).send(pets);
   } catch (err) {
@@ -68,7 +71,7 @@ const deleteById: RequestHandler = async (req, res) => {
       ? 'Pet deletion successful.'
       : 'Pet deletion failed.';
 
-    res.status(204).send({ message });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting pet data.',

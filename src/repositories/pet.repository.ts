@@ -1,19 +1,27 @@
-import { IPet } from '@app/interfaces';
+import { IPet, IPetFilters } from '@app/interfaces';
 import { Pet } from 'src/db_pg/models';
 import knex from '../db_pg/knex-config';
 
 const create = async (pet: IPet, ownerId: number) => {
   const [createdPet] = await knex<Pet>('pets').insert(pet).returning('*');
-  await knex('persons_pets').insert({
-    ownerId,
-    petId: createdPet.id,
-  });
 
   return createdPet;
 };
 
-const getPaginated = async (page: number, limit: number) => {
-  const result = await knex<Pet>('pets')
+const getPaginated = async (
+  page: number,
+  limit: number,
+  filters?: IPetFilters,
+) => {
+  const query = knex('pets');
+
+  if (filters?.ownerId) {
+    query
+      .join('persons_pets', { id: 'persons_pets.petId' })
+      .where({ ownerId: filters.ownerId });
+  }
+
+  const result = await query
     .select('*')
     .offset((page - 1) * limit)
     .limit(limit);

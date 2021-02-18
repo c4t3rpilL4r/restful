@@ -6,12 +6,6 @@ const router = express.Router();
 
 // CREATE
 router.post('/persons', personController.create);
-router.post(
-  '/persons/:personId/pets',
-  requestValidator.checkPersonIfExisting,
-  requestValidator.checkPetIfExisting,
-  personController.setPersonPet,
-);
 
 // READ
 router.get('/persons', personController.getPaginated);
@@ -26,6 +20,12 @@ router.put(
   '/persons/:personId',
   requestValidator.checkPersonIfExisting,
   personController.update,
+);
+router.put(
+  '/persons/:ownerId/pets/:petId',
+  requestValidator.checkPersonIfExisting,
+  requestValidator.checkPetIfExisting,
+  personController.setPersonPet,
 );
 
 // DELETE

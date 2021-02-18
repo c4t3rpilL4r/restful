@@ -1,13 +1,17 @@
 import { Pet } from 'src/db_pg/models';
 import { petRepository } from '@app/repositories';
-import { IPet } from '@app/interfaces';
+import { IPet, IPetFilters } from '@app/interfaces';
 
 const create = async (pet: IPet, ownerId: number) => {
   return await petRepository.create(pet, ownerId);
 };
 
-const getPaginated = async (page: number, limit: number) => {
-  return await petRepository.getPaginated(page, limit);
+const getPaginated = async (
+  page: number,
+  limit: number,
+  filters?: IPetFilters,
+) => {
+  return await petRepository.getPaginated(page, limit, filters);
 };
 
 const getById = async (petId: number) => {

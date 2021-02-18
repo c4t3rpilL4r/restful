@@ -71,7 +71,7 @@ const deleteById: RequestHandler = async (req, res) => {
       ? 'Animal deletion successful.'
       : 'Animal deletion failed.';
 
-    res.status(204).send({ message });
+    res.status(200).send({ message });
   } catch (err) {
     res.status(500).send({
       message: 'Error deleting animal data.',
